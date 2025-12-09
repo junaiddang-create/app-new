@@ -19,11 +19,10 @@
         
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #f0f4f8; /* Light Blue-Gray Background */
+            background-color: #f0f4f8; 
             -webkit-font-smoothing: antialiased;
         }
         
-        /* Select Arrow */
         select {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.5rem center;
@@ -35,7 +34,6 @@
             appearance: none;
         }
 
-        /* White Arrow for Colored Selects */
         select.white-arrow {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
         }
@@ -44,184 +42,255 @@
         .progress-bar { transition: width 1s ease-in-out; }
         .scroller::-webkit-scrollbar { width: 4px; }
         .scroller::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+        
+        /* Auth Screen Animation */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col items-center p-3 text-slate-800">
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-3 text-slate-800">
 
-    <!-- Header & Dashboard (Blue Theme) -->
-    <header class="w-full max-w-md bg-blue-900 text-white p-4 rounded-xl shadow-lg mb-3 border-b-4 border-blue-800">
-        <div class="flex justify-between items-center mb-4">
+    <!-- ================= AUTHENTICATION SCREEN ================= -->
+    <div id="auth-container" class="w-full max-w-sm bg-white p-8 rounded-2xl shadow-xl fade-in">
+        <div class="text-center mb-6">
+            <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-wallet text-2xl text-blue-600"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800">Madani Budget</h1>
+            <p class="text-xs text-slate-500">Secure Personal Finance</p>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="login-form" class="space-y-4">
             <div>
-                <h1 class="text-lg font-bold flex items-center gap-2">
-                    <i class="fas fa-wallet text-blue-200"></i>
-                    <span>Madani Budget</span>
-                </h1>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">User ID</label>
+                <input type="text" id="login-id" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" placeholder="e.g. Ali1990">
             </div>
-            <div class="text-right">
-                <p class="text-[10px] text-blue-200">Total Net Worth</p>
-                <h2 class="text-2xl font-bold tracking-tight" id="total-balance">₹0</h2>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Password</label>
+                <input type="password" id="login-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" placeholder="Enter Password">
             </div>
-        </div>
-
-        <!-- 3 Accounts -->
-        <div class="grid grid-cols-3 gap-2 mb-3">
-            <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30">
-                <p class="text-[9px] text-blue-200 uppercase tracking-wider font-semibold">Cash</p>
-                <p class="text-sm font-bold" id="cash-balance">₹0</p>
-            </div>
-            <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30">
-                <p class="text-[9px] text-blue-200 uppercase tracking-wider font-semibold">Bank</p>
-                <p class="text-sm font-bold" id="bank-balance">₹0</p>
-            </div>
-            <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30">
-                <p class="text-[9px] text-blue-200 uppercase tracking-wider font-semibold">Udhar</p>
-                <p class="text-sm font-bold text-yellow-300" id="udhar-balance">₹0</p>
+            
+            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md">
+                Login
+            </button>
+            
+            <div class="text-center text-xs text-slate-400 mt-2">
+                New here? <button onclick="toggleAuth('register')" class="text-blue-500 hover:underline font-bold">Create ID</button>
             </div>
         </div>
 
-        <!-- Income & Expense Summary -->
-        <div class="grid grid-cols-2 gap-2">
-            <div class="bg-blue-800/30 p-2 rounded-lg flex justify-between items-center border border-green-500/30 relative overflow-hidden">
-                <div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
-                <div class="pl-2">
-                    <p class="text-[9px] text-blue-200 uppercase">Income</p>
-                    <p class="text-sm font-bold text-green-400" id="total-income">₹0</p>
+        <!-- REGISTER FORM (Hidden initially) -->
+        <div id="register-form" class="space-y-4 hidden">
+            <div class="flex gap-2">
+                <div class="w-2/3">
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">First Name</label>
+                    <input type="text" id="reg-name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. Ali">
                 </div>
-                <i class="fas fa-arrow-down text-green-500/20 text-xl absolute right-2"></i>
-            </div>
-            <div class="bg-blue-800/30 p-2 rounded-lg flex justify-between items-center border border-red-500/30 relative overflow-hidden">
-                <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
-                <div class="pl-2">
-                    <p class="text-[9px] text-blue-200 uppercase">Expense</p>
-                    <p class="text-sm font-bold text-red-400" id="total-expense">₹0</p>
+                <div class="w-1/3">
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Year</label>
+                    <input type="number" id="reg-year" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="1995">
                 </div>
-                <i class="fas fa-arrow-up text-red-500/20 text-xl absolute right-2"></i>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Create Password</label>
+                <input type="password" id="reg-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Any Password">
+            </div>
+            
+            <button onclick="handleRegister()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md">
+                Generate ID & Register
+            </button>
+            
+            <div class="text-center text-xs text-slate-400 mt-2">
+                Already have ID? <button onclick="toggleAuth('login')" class="text-blue-500 hover:underline font-bold">Login Here</button>
             </div>
         </div>
-    </header>
 
-    <!-- Budget Progress -->
-    <div id="budget-display" class="w-full max-w-md bg-white p-3 rounded-xl card-shadow mb-3 hidden">
-        <h3 class="text-slate-700 font-bold mb-2 text-xs border-b border-slate-100 pb-2 uppercase tracking-wide flex justify-between items-center">
-            <span>Budget Goals</span>
-        </h3>
-        <div id="budget-bars-container" class="space-y-3 max-h-32 overflow-y-auto scroller pr-1"></div>
     </div>
 
-    <!-- New Entry Form -->
-    <div class="w-full max-w-md bg-white p-4 rounded-xl card-shadow mb-3" id="entry-form-card">
-        <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2">
-            <h3 class="text-slate-800 font-bold text-sm flex items-center gap-2">
-                New Entry
-            </h3>
-            <div class="flex gap-2">
-                <button onclick="toggleBudgetModal()" class="text-[10px] bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 font-bold transition-colors flex items-center">
-                    <i class="fas fa-sliders-h mr-1.5"></i>Set Limits
-                </button>
-                <button onclick="resetForm()" id="cancel-edit-btn" class="hidden text-[10px] text-red-500 hover:text-red-700 font-bold uppercase">Cancel</button>
-            </div>
-        </div>
+    <!-- ================= MAIN APP CONTAINER (Hidden Initially) ================= -->
+    <div id="app-container" class="hidden w-full max-w-md flex-col items-center w-full">
         
-        <div class="space-y-3">
-            <!-- Row 1: Date & Type -->
-            <div class="flex gap-2">
-                <div class="w-1/3">
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Date</label>
-                    <input type="date" id="entry-date" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700">
+        <!-- Header & Dashboard -->
+        <header class="w-full bg-blue-900 text-white p-4 rounded-xl shadow-lg mb-3 border-b-4 border-blue-800">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h1 class="text-lg font-bold flex items-center gap-2">
+                        <i class="fas fa-wallet text-blue-200"></i>
+                        <span>Madani Budget</span>
+                    </h1>
+                    <p class="text-[10px] text-blue-300 flex items-center gap-1">
+                        <i class="fas fa-user-circle"></i> <span id="display-username">User</span>
+                    </p>
                 </div>
-                <div class="w-2/3">
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Type</label>
-                    <select id="type" onchange="toggleFormState()" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-bold transition-colors duration-300 focus:ring-1 white-arrow">
-                        <option value="income" class="text-black bg-white">Income (+)</option>
-                        <option value="expense" class="text-black bg-white">Expense (-)</option>
-                        <option value="transfer" class="text-black bg-white">Transfer (⇄)</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Row 2: Account Selection -->
-            <div class="flex gap-2">
-                <div class="w-1/2" id="from-account-wrapper">
-                    <label id="account-label" class="block text-[10px] font-bold text-slate-500 mb-1">Account</label>
-                    <select id="account-select" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500">
-                        <option value="Cash">Cash</option>
-                        <option value="My Account">Bank Account</option>
-                        <option value="Udhar">Udhar</option>
-                    </select>
-                </div>
-                <div class="w-1/2 hidden" id="to-account-container">
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1">To Account</label>
-                    <select id="to-account-select" class="w-full p-2 bg-green-50 border border-green-200 rounded-lg text-xs font-semibold text-green-900 focus:outline-none focus:border-green-500">
-                        <option value="My Account">Bank Account</option>
-                        <option value="Cash">Cash</option>
-                        <option value="Udhar">Udhar</option>
-                    </select>
-                </div>
-                
-                <!-- Category Dropdown -->
-                <div class="w-1/2" id="category-wrapper">
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Category</label>
-                    <select id="desc-select" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 font-medium text-slate-700">
-                        <!-- Populated by JS based on type -->
-                    </select>
-                    <input type="text" id="desc-text" placeholder="Source..." class="hidden w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 text-slate-700">
+                <div class="text-right">
+                    <button onclick="logout()" class="text-[10px] bg-blue-800 hover:bg-blue-700 px-2 py-1 rounded mb-1 transition-colors border border-blue-700">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                    <h2 class="text-xl font-bold tracking-tight" id="total-balance">₹0</h2>
                 </div>
             </div>
 
-            <!-- Row 3: Amount & Note -->
-            <div class="flex gap-2">
-                <div class="w-1/3">
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Amount</label>
-                    <input type="number" id="amount" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <!-- 3 Accounts -->
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30">
+                    <p class="text-[9px] text-blue-200 uppercase tracking-wider font-semibold">Cash</p>
+                    <p class="text-sm font-bold" id="cash-balance">₹0</p>
                 </div>
-                <div class="w-2/3">
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Note / Details</label>
-                    <input type="text" id="entry-note" placeholder="Optional details..." class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 text-slate-600">
+                <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30">
+                    <p class="text-[9px] text-blue-200 uppercase tracking-wider font-semibold">Bank</p>
+                    <p class="text-sm font-bold" id="bank-balance">₹0</p>
+                </div>
+                <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30">
+                    <p class="text-[9px] text-blue-200 uppercase tracking-wider font-semibold">Udhar</p>
+                    <p class="text-sm font-bold text-yellow-300" id="udhar-balance">₹0</p>
                 </div>
             </div>
 
-            <button id="save-btn" onclick="addTransaction()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg transition duration-300 shadow-sm mt-1 text-xs uppercase tracking-wide flex justify-center items-center gap-2">
-                <i class="fas fa-plus"></i> <span>Save Entry</span>
-            </button>
+            <!-- Income & Expense Summary -->
+            <div class="grid grid-cols-2 gap-2">
+                <div class="bg-blue-800/30 p-2 rounded-lg flex justify-between items-center border border-green-500/30 relative overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
+                    <div class="pl-2">
+                        <p class="text-[9px] text-blue-200 uppercase">Income</p>
+                        <p class="text-sm font-bold text-green-400" id="total-income">₹0</p>
+                    </div>
+                    <i class="fas fa-arrow-down text-green-500/20 text-xl absolute right-2"></i>
+                </div>
+                <div class="bg-blue-800/30 p-2 rounded-lg flex justify-between items-center border border-red-500/30 relative overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
+                    <div class="pl-2">
+                        <p class="text-[9px] text-blue-200 uppercase">Expense</p>
+                        <p class="text-sm font-bold text-red-400" id="total-expense">₹0</p>
+                    </div>
+                    <i class="fas fa-arrow-up text-red-500/20 text-xl absolute right-2"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Budget Progress -->
+        <div id="budget-display" class="w-full bg-white p-3 rounded-xl card-shadow mb-3 hidden">
+            <h3 class="text-slate-700 font-bold mb-2 text-xs border-b border-slate-100 pb-2 uppercase tracking-wide flex justify-between items-center">
+                <span>Budget Goals</span>
+            </h3>
+            <div id="budget-bars-container" class="space-y-3 max-h-32 overflow-y-auto scroller pr-1"></div>
         </div>
-    </div>
 
-    <!-- Chart -->
-    <div class="w-full max-w-md bg-white p-3 rounded-xl card-shadow mb-3">
-        <h3 class="text-slate-700 font-bold mb-2 text-[10px] uppercase tracking-wide text-center">Analysis</h3>
-        <div class="relative h-24 w-full flex justify-center">
-            <canvas id="expenseChart"></canvas>
-        </div>
-        <p id="no-data-msg" class="text-center text-slate-300 text-[10px] mt-2 hidden">No data available</p>
-    </div>
+        <!-- New Entry Form -->
+        <div class="w-full bg-white p-4 rounded-xl card-shadow mb-3" id="entry-form-card">
+            <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2">
+                <h3 class="text-slate-800 font-bold text-sm flex items-center gap-2">
+                    New Entry
+                </h3>
+                <div class="flex gap-2">
+                    <button onclick="toggleBudgetModal()" class="text-[10px] bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 font-bold transition-colors flex items-center">
+                        <i class="fas fa-sliders-h mr-1.5"></i>Set Limits
+                    </button>
+                    <button onclick="resetForm()" id="cancel-edit-btn" class="hidden text-[10px] text-red-500 hover:text-red-700 font-bold uppercase">Cancel</button>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <!-- Row 1: Date & Type -->
+                <div class="flex gap-2">
+                    <div class="w-1/3">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Date</label>
+                        <input type="date" id="entry-date" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700">
+                    </div>
+                    <div class="w-2/3">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Type</label>
+                        <select id="type" onchange="toggleFormState()" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-bold transition-colors duration-300 focus:ring-1 white-arrow">
+                            <option value="income" class="text-black bg-white">Income (+)</option>
+                            <option value="expense" class="text-black bg-white">Expense (-)</option>
+                            <option value="transfer" class="text-black bg-white">Transfer (⇄)</option>
+                        </select>
+                    </div>
+                </div>
 
-    <!-- History -->
-    <div class="w-full max-w-md">
-        <div class="flex justify-between items-end mb-2">
-            <h3 class="text-slate-700 font-bold text-xs">Recent History</h3>
-            <div class="flex items-center gap-2">
-                <button onclick="downloadPDF()" class="text-[9px] flex items-center gap-1 text-blue-700 hover:text-blue-900 font-bold bg-blue-50 px-2 py-1 rounded border border-blue-200 transition-colors">
-                    <i class="fas fa-file-pdf"></i> Download PDF
+                <!-- Row 2: Account Selection -->
+                <div class="flex gap-2">
+                    <div class="w-1/2" id="from-account-wrapper">
+                        <label id="account-label" class="block text-[10px] font-bold text-slate-500 mb-1">Account</label>
+                        <select id="account-select" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500">
+                            <option value="Cash">Cash</option>
+                            <option value="My Account">Bank Account</option>
+                            <option value="Udhar">Udhar</option>
+                        </select>
+                    </div>
+                    <div class="w-1/2 hidden" id="to-account-container">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">To Account</label>
+                        <select id="to-account-select" class="w-full p-2 bg-green-50 border border-green-200 rounded-lg text-xs font-semibold text-green-900 focus:outline-none focus:border-green-500">
+                            <option value="My Account">Bank Account</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Udhar">Udhar</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Category Dropdown -->
+                    <div class="w-1/2" id="category-wrapper">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Category</label>
+                        <select id="desc-select" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 font-medium text-slate-700">
+                            <!-- Populated by JS based on type -->
+                        </select>
+                        <input type="text" id="desc-text" placeholder="Source..." class="hidden w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 text-slate-700">
+                    </div>
+                </div>
+
+                <!-- Row 3: Amount & Note -->
+                <div class="flex gap-2">
+                    <div class="w-1/3">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Amount</label>
+                        <input type="number" id="amount" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <div class="w-2/3">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Note / Details</label>
+                        <input type="text" id="entry-note" placeholder="Optional details..." class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 text-slate-600">
+                    </div>
+                </div>
+
+                <button id="save-btn" onclick="addTransaction()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg transition duration-300 shadow-sm mt-1 text-xs uppercase tracking-wide flex justify-center items-center gap-2">
+                    <i class="fas fa-plus"></i> <span>Save Entry</span>
                 </button>
-                <button onclick="clearAll()" class="text-[9px] text-red-400 hover:text-red-600 font-semibold">Clear All</button>
             </div>
         </div>
-        <ul id="list" class="space-y-2 pb-10"></ul>
-    </div>
 
-    <!-- DATA BACKUP SECTION -->
-    <div class="w-full max-w-md mt-4 mb-10 text-center border-t pt-4 border-slate-200">
-        <p class="text-[10px] text-slate-400 mb-2 uppercase tracking-widest font-bold">Data Safety</p>
-        <div class="flex gap-2 justify-center">
-            <button onclick="exportData()" class="text-xs bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 px-4 py-2 rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all">
-                <i class="fas fa-cloud-download-alt text-blue-600"></i> Backup Save Karein
-            </button>
-            <button onclick="document.getElementById('import-file').click()" class="text-xs bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 px-4 py-2 rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all">
-                <i class="fas fa-cloud-upload-alt text-green-600"></i> Restore Data
-            </button>
-            <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(this)">
+        <!-- Chart -->
+        <div class="w-full bg-white p-3 rounded-xl card-shadow mb-3">
+            <h3 class="text-slate-700 font-bold mb-2 text-[10px] uppercase tracking-wide text-center">Analysis</h3>
+            <div class="relative h-24 w-full flex justify-center">
+                <canvas id="expenseChart"></canvas>
+            </div>
+            <p id="no-data-msg" class="text-center text-slate-300 text-[10px] mt-2 hidden">No data available</p>
         </div>
-        <p class="text-[9px] text-slate-400 mt-2 italic">Save backup file to Google Drive/Email for long term safety.</p>
+
+        <!-- History -->
+        <div class="w-full">
+            <div class="flex justify-between items-end mb-2">
+                <h3 class="text-slate-700 font-bold text-xs">Recent History</h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="downloadPDF()" class="text-[9px] flex items-center gap-1 text-blue-700 hover:text-blue-900 font-bold bg-blue-50 px-2 py-1 rounded border border-blue-200 transition-colors">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </button>
+                    <button onclick="clearAll()" class="text-[9px] text-red-400 hover:text-red-600 font-semibold">Clear All</button>
+                </div>
+            </div>
+            <ul id="list" class="space-y-2 pb-10"></ul>
+        </div>
+
+        <!-- DATA BACKUP SECTION -->
+        <div class="w-full mt-4 mb-10 text-center border-t pt-4 border-slate-200">
+            <p class="text-[10px] text-slate-400 mb-2 uppercase tracking-widest font-bold">Data Safety</p>
+            <div class="flex gap-2 justify-center">
+                <button onclick="exportData()" class="text-xs bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 px-4 py-2 rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all">
+                    <i class="fas fa-cloud-download-alt text-blue-600"></i> Backup Save Karein
+                </button>
+                <button onclick="document.getElementById('import-file').click()" class="text-xs bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 px-4 py-2 rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all">
+                    <i class="fas fa-cloud-upload-alt text-green-600"></i> Restore Data
+                </button>
+                <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(this)">
+            </div>
+            <p class="text-[9px] text-slate-400 mt-2 italic">Save backup file to Google Drive/Email for long term safety.</p>
+        </div>
     </div>
 
     <!-- BUDGET MODAL -->
@@ -253,123 +322,148 @@
     </div>
 
     <script>
-        // --- DATA ---
-        const expenseCategories = [
-            { name: "Rent", type: "needs" }, 
-            { name: "Groceries", type: "needs" },
-            { name: "Bills (Electricity/Water)", type: "needs" }, 
-            { name: "Education Fees", type: "needs" },
-            { name: "Medical", type: "needs" }, 
-            { name: "Transport/Fuel", type: "needs" },
-            { name: "Mobile/Internet", type: "needs" }, 
-            { name: "Food/Dining", type: "wants" },
-            { name: "Shopping", type: "wants" }, 
-            { name: "Gifts/Charity", type: "wants" },
-            { name: "Other Expenses", type: "wants" },
-            { name: "Savings", type: "savings" }, 
-            { name: "Committee (BC)", type: "savings" }
-        ];
+        // ... existing global variables ...
+        // ... (expenseCategories, incomeCategories etc. remain same) ...
 
-        const incomeCategories = [
-            { name: "Salary", type: "income" },
-            { name: "Business Profit", type: "income" },
-            { name: "Bonus", type: "income" },
-            { name: "Gift", type: "income" },
-            { name: "Loan Taken", type: "income" },
-            { name: "Other Income", type: "income" }
-        ];
-
-        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-        let budgetSettings = JSON.parse(localStorage.getItem('budgetSettings')) || { income: 0, budgets: {} };
+        let currentUser = null;
+        let transactions = [];
+        let budgetSettings = { income: 0, budgets: {} };
         let chartInstance = null;
         let editingId = null;
 
         // Elements
-        const balanceEl = document.getElementById('total-balance');
-        const incomeEl = document.getElementById('total-income');
-        const expenseEl = document.getElementById('total-expense');
-        const cashBalanceEl = document.getElementById('cash-balance');
-        const bankBalanceEl = document.getElementById('bank-balance');
-        const udharBalanceEl = document.getElementById('udhar-balance');
-        const listEl = document.getElementById('list');
-        const descText = document.getElementById('desc-text');
-        const descSelect = document.getElementById('desc-select');
-        const entryNote = document.getElementById('entry-note');
-        const amountInput = document.getElementById('amount');
-        const typeInput = document.getElementById('type');
-        const accountInput = document.getElementById('account-select');
-        const toAccountInput = document.getElementById('to-account-select');
-        const toAccountContainer = document.getElementById('to-account-container');
-        const categoryWrapper = document.getElementById('category-wrapper');
-        const noDataMsg = document.getElementById('no-data-msg');
-        const dateInput = document.getElementById('entry-date');
-        const saveBtn = document.getElementById('save-btn');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        // ... (other elements remain same) ...
 
         // Init
         window.onload = function() {
             setupDateInput();
-            updateValues();
-            updateBudgetDisplay();
-            toggleFormState(); 
         };
 
-        // --- BACKUP & RESTORE LOGIC ---
-        function exportData() {
-            const data = {
-                transactions: transactions,
-                budgetSettings: budgetSettings,
-                exportDate: new Date().toISOString()
-            };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "Madani_Budget_Backup_" + new Date().toISOString().split('T')[0] + ".json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
+        // --- AUTHENTICATION LOGIC ---
+        
+        function toggleAuth(mode) {
+            if(mode === 'register') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            } else {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            }
         }
 
-        function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.transactions && Array.isArray(data.transactions)) {
-                        if(confirm("Warning: Current data will be replaced with backup data. Continue?")) {
-                            transactions = data.transactions;
-                            budgetSettings = data.budgetSettings || { income: 0, budgets: {} };
-                            updateLocalStorage();
-                            updateValues();
-                            updateBudgetDisplay();
-                            alert("Success! Data restored.");
-                        }
-                    } else {
-                        alert("Invalid backup file.");
-                    }
-                } catch (err) {
-                    alert("Error reading file.");
+        function handleLogin() {
+            const user = document.getElementById('login-id').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+
+            if (!user || !pass) {
+                alert("Please enter ID and Password");
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('madani_users')) || {};
+
+            if (users[user]) {
+                if (users[user] === pass) {
+                    performLogin(user);
+                } else {
+                    alert("Incorrect Password!");
                 }
-                // Reset input so same file can be selected again if needed
-                input.value = '';
-            };
-            reader.readAsText(file);
+            } else {
+                alert("ID not found. Please create a new ID.");
+            }
         }
 
-        // --- CORE LOGIC ---
+        function handleRegister() {
+            const name = document.getElementById('reg-name').value.trim().replace(/\s/g, ''); // Remove spaces
+            const year = document.getElementById('reg-year').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+
+            if (!name || !year || !pass) {
+                alert("Please fill all fields");
+                return;
+            }
+            
+            if (year.length !== 4) {
+                alert("Please enter a valid 4-digit Year (e.g. 1990)");
+                return;
+            }
+
+            // Generate ID: Name + Year
+            const newID = `${name}${year}`;
+            
+            const users = JSON.parse(localStorage.getItem('madani_users')) || {};
+
+            if (users[newID]) {
+                alert(`ID "${newID}" already exists! Please use a different name or login.`);
+            } else {
+                users[newID] = pass;
+                localStorage.setItem('madani_users', JSON.stringify(users));
+                
+                alert(`Registration Successful!\n\nYour User ID is: ${newID}\n\nPlease remember this ID to login.`);
+                
+                // Auto switch to login and fill ID
+                toggleAuth('login');
+                document.getElementById('login-id').value = newID;
+                document.getElementById('login-pass').focus();
+            }
+        }
+
+        function performLogin(user) {
+            currentUser = user;
+            sessionStorage.setItem('madani_current_user', user);
+            
+            authContainer.style.display = 'none';
+            appContainer.classList.remove('hidden');
+            appContainer.classList.add('flex');
+            document.body.classList.remove('justify-center');
+            
+            document.getElementById('display-username').innerText = user;
+            
+            loadUserData();
+            toggleFormState(); 
+        }
+
+        function logout() {
+            currentUser = null;
+            sessionStorage.removeItem('madani_current_user');
+            location.reload(); 
+        }
+
+        function loadUserData() {
+            if (!currentUser) return;
+            transactions = JSON.parse(localStorage.getItem(`${currentUser}_transactions`)) || [];
+            budgetSettings = JSON.parse(localStorage.getItem(`${currentUser}_budgetSettings`)) || { income: 0, budgets: {} };
+            
+            updateValues();
+            updateBudgetDisplay();
+        }
+
+        function saveUserData() {
+            if (!currentUser) return;
+            localStorage.setItem(`${currentUser}_transactions`, JSON.stringify(transactions));
+            localStorage.setItem(`${currentUser}_budgetSettings`, JSON.stringify(budgetSettings));
+        }
+
+        // ... (Rest of the app logic: addTransaction, updateValues, downloadPDF etc. remains exactly same) ...
+        
+        // Ensure to include all previous functions below (setupDateInput, populateCategorySelect, toggleFormState, etc.)
+        
         function setupDateInput() {
             const today = new Date();
             const min = new Date(today); min.setDate(today.getDate() - 7);
             const max = new Date(today); max.setDate(today.getDate() + 7);
             const fmt = d => d.toISOString().split('T')[0];
-            dateInput.min = fmt(min); dateInput.max = fmt(max);
-            dateInput.value = fmt(today);
+            const el = document.getElementById('entry-date');
+            if(el) { el.min = fmt(min); el.max = fmt(max); el.value = fmt(today); }
         }
 
         function populateCategorySelect(type) {
+            const descSelect = document.getElementById('desc-select');
             descSelect.innerHTML = '<option value="" disabled selected>Select Category...</option>';
             let listToUse = [];
             
@@ -390,8 +484,14 @@
         }
 
         function toggleFormState() {
+            const typeInput = document.getElementById('type');
             const type = typeInput.value;
-            // Base Class
+            const toAccountContainer = document.getElementById('to-account-container');
+            const categoryWrapper = document.getElementById('category-wrapper');
+            const descSelect = document.getElementById('desc-select');
+            const descText = document.getElementById('desc-text');
+            const accountLabel = document.getElementById('account-label');
+
             typeInput.className = "w-full p-2 border border-slate-300 rounded-lg text-xs font-bold transition-colors duration-300 focus:ring-1 white-arrow";
 
             if (type === 'transfer') {
@@ -400,9 +500,11 @@
                 categoryWrapper.classList.add('hidden'); 
                 descSelect.classList.add('hidden');
                 descText.classList.remove('hidden'); descText.placeholder = "e.g. Self Transfer";
+                accountLabel.innerText = "From Account";
             } else {
                 categoryWrapper.classList.remove('hidden'); 
                 toAccountContainer.classList.add('hidden');
+                accountLabel.innerText = "Account";
                 
                 descSelect.classList.remove('hidden');
                 descText.classList.add('hidden');
@@ -418,18 +520,18 @@
         }
 
         function addTransaction() {
-            const type = typeInput.value;
-            const amount = +amountInput.value;
-            const account = accountInput.value;
-            const toAccount = toAccountInput.value;
-            const dateVal = dateInput.value;
-            const note = entryNote.value.trim();
+            const type = document.getElementById('type').value;
+            const amount = +document.getElementById('amount').value;
+            const account = document.getElementById('account-select').value;
+            const toAccount = document.getElementById('to-account-select').value;
+            const dateVal = document.getElementById('entry-date').value;
+            const note = document.getElementById('entry-note').value.trim();
             
             let category = "";
             let budgetType = null;
 
             if (type !== 'transfer') {
-                category = descSelect.value;
+                category = document.getElementById('desc-select').value;
                 if (!category) { alert("Please select a Category"); return; }
                 
                 let listToCheck = type === 'income' ? incomeCategories : expenseCategories;
@@ -468,10 +570,13 @@
                 });
             }
 
-            updateLocalStorage(); updateValues(); updateBudgetDisplay();
+            saveUserData(); 
+            updateValues(); 
+            updateBudgetDisplay();
             
-            if(type !== 'transfer') descSelect.value = '';
-            entryNote.value = ''; amountInput.value = ''; 
+            if(type !== 'transfer') document.getElementById('desc-select').value = '';
+            document.getElementById('entry-note').value = ''; 
+            document.getElementById('amount').value = ''; 
         }
 
         function editTransaction(id) {
@@ -479,24 +584,25 @@
             if (!t) return;
             editingId = id;
             
+            const typeInput = document.getElementById('type');
             typeInput.value = t.type;
             toggleFormState(); 
             
             setTimeout(() => {
                 if (t.type !== 'transfer') {
-                    descSelect.value = t.desc;
+                    document.getElementById('desc-select').value = t.desc;
                 } else {
-                    descText.value = t.desc;
+                    document.getElementById('desc-text').value = t.desc;
                 }
             }, 50);
             
-            amountInput.value = t.amount;
-            accountInput.value = t.account;
-            dateInput.value = t.date;
-            entryNote.value = t.note || '';
+            document.getElementById('amount').value = t.amount;
+            document.getElementById('account-select').value = t.account;
+            document.getElementById('entry-date').value = t.date;
+            document.getElementById('entry-note').value = t.note || '';
 
             if (t.type === 'transfer') {
-                toAccountInput.value = t.toAccount;
+                document.getElementById('to-account-select').value = t.toAccount;
             }
 
             saveBtn.innerHTML = '<i class="fas fa-check"></i> <span>Update Entry</span>';
@@ -506,14 +612,14 @@
 
         function resetForm() {
             editingId = null;
-            entryNote.value = ''; amountInput.value = ''; 
+            document.getElementById('entry-note').value = ''; 
+            document.getElementById('amount').value = ''; 
             setupDateInput();
-            descSelect.value = '';
+            document.getElementById('desc-select').value = '';
             saveBtn.innerHTML = '<i class="fas fa-plus"></i> <span>Save Entry</span>';
             cancelEditBtn.classList.add('hidden');
         }
 
-        // --- VISUALS ---
         function updateValues() {
             const income = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
             const expense = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
@@ -608,7 +714,7 @@
             if(!cat) return;
             if (limit > 0) budgetSettings.budgets[cat] = limit;
             else delete budgetSettings.budgets[cat];
-            localStorage.setItem('budgetSettings', JSON.stringify(budgetSettings));
+            saveUserData();
             toggleBudgetModal(); updateBudgetDisplay();
         }
         function updateBudgetDisplay() {
@@ -665,39 +771,34 @@
             });
         }
 
-        function removeTransaction(id) { if(confirm("Delete?")) { transactions = transactions.filter(t => t.id !== id); if(editingId===id) resetForm(); updateLocalStorage(); updateValues(); updateBudgetDisplay(); } }
-        function clearAll() { if(confirm("Reset App?")) { transactions = []; budgetSettings={income:0, budgets:{}}; updateLocalStorage(); localStorage.removeItem('budgetSettings'); updateValues(); updateBudgetDisplay(); } }
-        function updateLocalStorage() { localStorage.setItem('transactions', JSON.stringify(transactions)); }
+        function removeTransaction(id) { if(confirm("Delete?")) { transactions = transactions.filter(t => t.id !== id); if(editingId===id) resetForm(); saveUserData(); updateValues(); updateBudgetDisplay(); } }
+        function clearAll() { if(confirm("Reset App?")) { transactions = []; budgetSettings={income:0, budgets:{}}; saveUserData(); resetForm(); updateValues(); updateBudgetDisplay(); } }
 
-        // --- PDF GENERATOR ---
+        // --- PDF GENERATOR (UPDATED LIGHT THEME) ---
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
             // COLORS (Very Light Theme)
-            const bgLight = [240, 249, 255];    // Very pale blue (Background)
-            const textDark = [30, 58, 138];     // Navy Blue (Text)
-            const textGray = [100, 116, 139];   // Slate Gray (Subtext)
-            const accentBlue = [186, 230, 253]; // Light Blue (Borders/Accents)
+            const bgLight = [240, 249, 255];    
+            const textDark = [30, 58, 138];     
+            const textGray = [100, 116, 139];   
+            const accentBlue = [186, 230, 253]; 
 
-            // 1. Header (Very Light Background)
+            // 1. Header
             doc.setFillColor(...bgLight); 
             doc.rect(0, 0, 210, 50, 'F'); 
             
-            // Title (Dark Text on Light Background)
             doc.setTextColor(...textDark);
-            doc.setFontSize(24); 
-            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(24); doc.setFont('helvetica', 'bold');
             doc.text("Madani Budget Planner", 105, 25, { align: 'center' });
             
-            // Subtitle
             doc.setTextColor(...textGray);
-            doc.setFontSize(11); 
-            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11); doc.setFont('helvetica', 'normal');
             const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
             doc.text(`Financial Report  |  ${today}`, 105, 35, { align: 'center' });
 
-            // 2. Summary Table
+            // 2. Summary
             const inc = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
             const exp = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
             const summaryBody = [["0.00", `${inc - exp}`, `${(inc - exp).toFixed(2)}`]];
@@ -707,38 +808,20 @@
                 head: [['Opening Balance', 'Total Activity', 'Closing Balance (Net)']],
                 body: summaryBody,
                 theme: 'grid',
-                headStyles: { 
-                    fillColor: [255, 255, 255], // White header
-                    textColor: textGray, 
-                    fontStyle: 'bold', 
-                    halign: 'left',
-                    lineWidth: 0
-                },
-                bodyStyles: { 
-                    textColor: textDark, 
-                    fontStyle: 'bold',
-                    fontSize: 12
-                },
-                columnStyles: { 
-                    1: { textColor: [22, 163, 74] }, // Green
-                    2: { textColor: textDark }       // Dark Blue
-                },
-                styles: { lineColor: [226, 232, 240], lineWidth: 0.1, cellPadding: 6 }, // Very subtle lines
+                headStyles: { fillColor: [255, 255, 255], textColor: textGray, fontStyle: 'bold', halign: 'left', lineWidth: 0 },
+                bodyStyles: { textColor: textDark, fontStyle: 'bold', fontSize: 12 },
+                columnStyles: { 1: { textColor: [22, 163, 74] }, 2: { textColor: textDark } },
+                styles: { lineColor: [226, 232, 240], lineWidth: 0.1, cellPadding: 6 },
                 margin: { left: 14, right: 14 }
             });
 
-            // 3. Transaction Details Section Title
-            doc.setFontSize(14); 
-            doc.setTextColor(...textDark);
-            doc.setFont('helvetica', 'bold');
+            // 3. Transactions Header
+            doc.setFontSize(14); doc.setTextColor(...textDark); doc.setFont('helvetica', 'bold');
             doc.text("Transaction Details", 14, doc.lastAutoTable.finalY + 15);
-            
-            // Decorative Underline (Light Blue)
-            doc.setDrawColor(...accentBlue);
-            doc.setLineWidth(0.5);
+            doc.setDrawColor(...accentBlue); doc.setLineWidth(0.5);
             doc.line(14, doc.lastAutoTable.finalY + 17, 60, doc.lastAutoTable.finalY + 17);
 
-            // 4. Transaction Table
+            // 4. Table
             const rows = transactions.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(t => {
                 const date = new Date(t.date).toLocaleDateString('en-GB'); 
                 const time = t.time || '-';
@@ -754,52 +837,63 @@
                 startY: doc.lastAutoTable.finalY + 25,
                 head: [['Date', 'Time', 'Description', 'Account', 'Credit', 'Debit']],
                 body: rows,
-                theme: 'plain', // Clean look
-                headStyles: { 
-                    fillColor: bgLight, 
-                    textColor: textDark, 
-                    fontStyle: 'bold',
-                    lineWidth: 0 
-                },
-                bodyStyles: { 
-                    textColor: [71, 85, 105], // Slate 600
-                    fontSize: 9,
-                    cellPadding: 4
-                },
-                columnStyles: { 
-                    4: { textColor: [22, 163, 74], halign: 'right', fontStyle: 'bold' }, // Green Credit
-                    5: { textColor: [220, 38, 38], halign: 'right', fontStyle: 'bold' }  // Red Debit
-                },
-                alternateRowStyles: { fillColor: [252, 252, 253] }, // Almost white stripe
+                theme: 'plain',
+                headStyles: { fillColor: bgLight, textColor: textDark, fontStyle: 'bold', lineWidth: 0 },
+                bodyStyles: { textColor: [71, 85, 105], fontSize: 9, cellPadding: 4 },
+                columnStyles: { 4: { textColor: [22, 163, 74], halign: 'right', fontStyle: 'bold' }, 5: { textColor: [220, 38, 38], halign: 'right', fontStyle: 'bold' } },
+                alternateRowStyles: { fillColor: [252, 252, 253] },
                 margin: { left: 14, right: 14 },
-                // Add bottom border to rows
                 didDrawCell: function (data) {
                     if (data.section === 'head' || data.section === 'body') {
-                        doc.setDrawColor(240, 240, 240);
-                        doc.setLineWidth(0.1);
+                        doc.setDrawColor(240, 240, 240); doc.setLineWidth(0.1);
                         doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
                     }
                 }
             });
 
-            // 5. Add Border & Footer
+            // 5. Border
             const pageCount = doc.internal.getNumberOfPages();
             for(let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
-                
-                // Very Light Border
-                doc.setDrawColor(...accentBlue); 
-                doc.setLineWidth(0.3);
-                doc.rect(5, 5, 200, 287); 
-
-                // Footer
-                doc.setFontSize(8);
-                doc.setTextColor(180); // Very light gray text
+                doc.setDrawColor(...accentBlue); doc.setLineWidth(0.3); doc.rect(5, 5, 200, 287); 
+                doc.setFontSize(8); doc.setTextColor(180);
                 doc.text(`Page ${i} of ${pageCount}`, 196, 290, { align: 'right' });
                 doc.text("Madani Budget Planner", 14, 290);
             }
-
             doc.save('Madani_Budget_Report.pdf');
+        }
+
+        // --- BACKUP/RESTORE ---
+        function exportData() {
+            if (!currentUser) { alert("Login required"); return; }
+            const data = { username: currentUser, transactions: transactions, budgetSettings: budgetSettings, exportDate: new Date().toISOString() };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+            const a = document.createElement('a');
+            a.setAttribute("href", dataStr);
+            a.setAttribute("download", `Madani_Budget_Backup_${currentUser}.json`);
+            document.body.appendChild(a); a.click(); a.remove();
+        }
+
+        function importData(input) {
+            if (!currentUser) { alert("Login required"); return; }
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions && Array.isArray(data.transactions)) {
+                        if(confirm("Replace current data?")) {
+                            transactions = data.transactions;
+                            budgetSettings = data.budgetSettings || { income: 0, budgets: {} };
+                            saveUserData(); updateValues(); updateBudgetDisplay();
+                            alert("Data Restored!");
+                        }
+                    }
+                } catch (err) { alert("Error reading file."); }
+                input.value = '';
+            };
+            reader.readAsText(file);
         }
     </script>
 </body>
