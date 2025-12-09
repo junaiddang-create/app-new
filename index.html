@@ -42,81 +42,129 @@
         .progress-bar { transition: width 1s ease-in-out; }
         .scroller::-webkit-scrollbar { width: 4px; }
         .scroller::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
-        
-        /* Auth Screen Animation */
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Spinner */
+        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3498db; width: 20px; height: 20px; -webkit-animation: spin 1s linear infinite; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-3 text-slate-800">
+
+    <!-- ================= LOADING OVERLAY ================= -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 z-[60] hidden flex items-center justify-center">
+        <div class="loader"></div>
+    </div>
 
     <!-- ================= AUTHENTICATION SCREEN ================= -->
     <div id="auth-container" class="w-full max-w-sm bg-white p-8 rounded-2xl shadow-xl fade-in">
         <div class="text-center mb-6">
             <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i class="fas fa-wallet text-2xl text-blue-600"></i>
+                <i class="fas fa-cloud text-2xl text-blue-600"></i>
             </div>
             <h1 class="text-2xl font-bold text-slate-800">Madani Budget</h1>
-            <p class="text-xs text-slate-500">Secure Personal Finance</p>
+            <p class="text-xs text-slate-500">Cloud Sync & Secure</p>
         </div>
 
         <!-- LOGIN FORM -->
         <div id="login-form" class="space-y-4">
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">User ID</label>
-                <input type="text" id="login-id" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" placeholder="e.g. Ali1990">
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Email ID (Gmail)</label>
+                <input type="email" id="login-id" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="e.g. ali@gmail.com">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Password</label>
-                <input type="password" id="login-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" placeholder="Enter Password">
+                <div class="relative">
+                    <input type="password" id="login-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10" placeholder="Enter Password">
+                    <button onclick="togglePass('login-pass', this)" class="absolute right-3 top-3 text-slate-400 hover:text-blue-500 focus:outline-none">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="text-right mt-1">
+                    <button onclick="toggleAuth('forgot')" class="text-xs text-blue-500 hover:underline">Forgot Password?</button>
+                </div>
             </div>
             
-            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md">
-                Login
+            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md flex justify-center items-center gap-2">
+                <span>Login</span>
             </button>
             
             <div class="text-center text-xs text-slate-400 mt-2">
-                New here? <button onclick="toggleAuth('register')" class="text-blue-500 hover:underline font-bold">Create ID</button>
+                New user? <button onclick="toggleAuth('register')" class="text-blue-500 hover:underline font-bold">Register with Email</button>
             </div>
         </div>
 
-        <!-- REGISTER FORM (Hidden initially) -->
+        <!-- REGISTER FORM -->
         <div id="register-form" class="space-y-4 hidden">
-            <div class="flex gap-2">
-                <div class="w-2/3">
-                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">First Name</label>
-                    <input type="text" id="reg-name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. Ali">
-                </div>
-                <div class="w-1/3">
-                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Year</label>
-                    <input type="number" id="reg-year" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="1995">
-                </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Your Email (Gmail)</label>
+                <input type="email" id="reg-email" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. ali@gmail.com">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Create Password</label>
-                <input type="password" id="reg-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Any Password">
+                <div class="relative">
+                    <input type="password" id="reg-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 pr-10" placeholder="Any Password">
+                    <button onclick="togglePass('reg-pass', this)" class="absolute right-3 top-3 text-slate-400 hover:text-blue-500 focus:outline-none">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Recovery PIN (4 Digits)</label>
+                <input type="number" id="reg-pin" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. 1234">
+                <p class="text-[10px] text-slate-400 mt-1">Needed if you forget password.</p>
             </div>
             
             <button onclick="handleRegister()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md">
-                Generate ID & Register
+                Register & Login
             </button>
             
             <div class="text-center text-xs text-slate-400 mt-2">
-                Already have ID? <button onclick="toggleAuth('login')" class="text-blue-500 hover:underline font-bold">Login Here</button>
+                Already have account? <button onclick="toggleAuth('login')" class="text-blue-500 hover:underline font-bold">Login Here</button>
             </div>
         </div>
 
+        <!-- FORGOT PASSWORD FORM -->
+        <div id="forgot-form" class="space-y-4 hidden">
+            <h3 class="text-sm font-bold text-center text-slate-700 mb-2">Reset Password</h3>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Email ID</label>
+                <input type="email" id="forgot-id" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. ali@gmail.com">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Recovery PIN</label>
+                <input type="number" id="forgot-pin" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter 4-digit PIN">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">New Password</label>
+                <div class="relative">
+                    <input type="password" id="forgot-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 pr-10" placeholder="New Password">
+                    <button onclick="togglePass('forgot-pass', this)" class="absolute right-3 top-3 text-slate-400 hover:text-blue-500 focus:outline-none">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <button onclick="handleResetPassword()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md">
+                Reset Password
+            </button>
+            
+            <div class="text-center text-xs text-slate-400 mt-2">
+                <button onclick="toggleAuth('login')" class="text-blue-500 hover:underline font-bold">Back to Login</button>
+            </div>
+        </div>
     </div>
 
-    <!-- ================= MAIN APP CONTAINER (Hidden Initially) ================= -->
+    <!-- ================= MAIN APP CONTAINER ================= -->
     <div id="app-container" class="hidden w-full max-w-md flex-col items-center w-full">
         
-        <!-- Header & Dashboard -->
+        <!-- Header -->
         <header class="w-full bg-blue-900 text-white p-4 rounded-xl shadow-lg mb-3 border-b-4 border-blue-800">
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h1 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-wallet text-blue-200"></i>
+                        <i class="fas fa-cloud text-blue-200"></i>
                         <span>Madani Budget</span>
                     </h1>
                     <p class="text-[10px] text-blue-300 flex items-center gap-1">
@@ -271,7 +319,7 @@
                     <button onclick="downloadPDF()" class="text-[9px] flex items-center gap-1 text-blue-700 hover:text-blue-900 font-bold bg-blue-50 px-2 py-1 rounded border border-blue-200 transition-colors">
                         <i class="fas fa-file-pdf"></i> Download PDF
                     </button>
-                    <button onclick="clearAll()" class="text-[9px] text-red-400 hover:text-red-600 font-semibold">Clear All</button>
+                    <button onclick="deleteTransaction(null, true)" class="text-[9px] text-red-400 hover:text-red-600 font-semibold">Clear All</button>
                 </div>
             </div>
             <ul id="list" class="space-y-2 pb-10"></ul>
@@ -321,205 +369,177 @@
         </div>
     </div>
 
-    <script>
-        // ... existing global variables ...
-        // ... (expenseCategories, incomeCategories etc. remain same) ...
+    <!-- Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase Init
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // State
         let currentUser = null;
         let transactions = [];
         let budgetSettings = { income: 0, budgets: {} };
         let chartInstance = null;
         let editingId = null;
 
-        // Elements
-        const authContainer = document.getElementById('auth-container');
-        const appContainer = document.getElementById('app-container');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        
-        // ... (other elements remain same) ...
+        const expenseCategories = [
+            { name: "Rent", type: "needs" }, { name: "Groceries", type: "needs" },
+            { name: "Bills", type: "needs" }, { name: "Education", type: "needs" },
+            { name: "Medical", type: "needs" }, { name: "Transport", type: "needs" },
+            { name: "Mobile/Data", type: "needs" }, { name: "Food/Dining", type: "wants" },
+            { name: "Shopping", type: "wants" }, { name: "Gifts", type: "wants" },
+            { name: "Savings", type: "savings" }, { name: "Other", type: "wants" }
+        ];
+        const incomeCategories = [
+            { name: "Salary", type: "income" }, { name: "Business", type: "income" },
+            { name: "Bonus", type: "income" }, { name: "Gift", type: "income" },
+            { name: "Loan", type: "income" }, { name: "Other", type: "income" }
+        ];
 
-        // Init
-        window.onload = function() {
-            setupDateInput();
+        // Auth on Load
+        (async function init() {
+            try {
+                await signInAnonymously(auth);
+                document.getElementById('loading-overlay').classList.add('hidden');
+                setupDateInput();
+            } catch (error) {
+                console.error("Auth Failed", error);
+                alert("Connection Error. Please refresh.");
+            }
+        })();
+
+        // --- EXPORT FUNCTIONS FOR HTML HANDLERS ---
+        window.toggleAuth = (mode) => {
+            const login = document.getElementById('login-form');
+            const reg = document.getElementById('register-form');
+            const forgot = document.getElementById('forgot-form');
+            
+            login.classList.add('hidden');
+            reg.classList.add('hidden');
+            forgot.classList.add('hidden');
+
+            if(mode === 'register') reg.classList.remove('hidden');
+            else if(mode === 'forgot') forgot.classList.remove('hidden');
+            else login.classList.remove('hidden');
         };
 
-        // --- AUTHENTICATION LOGIC ---
-        
-        function toggleAuth(mode) {
-            if(mode === 'register') {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
+        window.togglePass = (id, btn) => {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
-                registerForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
-        }
+        };
 
-        function handleLogin() {
+        window.handleLogin = async () => {
             const user = document.getElementById('login-id').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
+            if(!user || !pass) return alert("Enter User ID and Password");
 
-            if (!user || !pass) {
-                alert("Please enter ID and Password");
-                return;
-            }
-
-            const users = JSON.parse(localStorage.getItem('madani_users')) || {};
-
-            if (users[user]) {
-                if (users[user] === pass) {
-                    performLogin(user);
+            showLoading(true);
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user);
+                const docSnap = await getDoc(docRef);
+                
+                if(docSnap.exists()) {
+                    const data = docSnap.data();
+                    if(data.password === pass) {
+                        currentUser = user;
+                        transactions = data.transactions || [];
+                        budgetSettings = data.budgetSettings || {income: 0, budgets: {}};
+                        showApp();
+                    } else {
+                        alert("Incorrect Password");
+                    }
                 } else {
-                    alert("Incorrect Password!");
+                    alert("User ID not found. Please Register.");
                 }
-            } else {
-                alert("ID not found. Please create a new ID.");
-            }
-        }
+            } catch(e) { console.error(e); alert("Login Error: " + e.message); }
+            showLoading(false);
+        };
 
-        function handleRegister() {
-            const name = document.getElementById('reg-name').value.trim().replace(/\s/g, ''); // Remove spaces
-            const year = document.getElementById('reg-year').value.trim();
+        window.handleRegister = async () => {
+            const email = document.getElementById('reg-email').value.trim();
             const pass = document.getElementById('reg-pass').value.trim();
-
-            if (!name || !year || !pass) {
-                alert("Please fill all fields");
-                return;
-            }
+            const pin = document.getElementById('reg-pin').value.trim();
             
-            if (year.length !== 4) {
-                alert("Please enter a valid 4-digit Year (e.g. 1990)");
-                return;
-            }
+            if(!email || !pass || !pin) return alert("Fill all fields");
+            if(pin.length !== 4) return alert("PIN must be 4 digits");
 
-            // Generate ID: Name + Year
-            const newID = `${name}${year}`;
+            // Simple validation to ensure it looks like an email
+            if(!email.includes('@')) return alert("Enter valid email");
+
+            // Use email as ID (replace special chars for firestore doc ID safety if needed, but email is mostly safe)
+            const userId = email; 
+
+            showLoading(true);
             
-            const users = JSON.parse(localStorage.getItem('madani_users')) || {};
-
-            if (users[newID]) {
-                alert(`ID "${newID}" already exists! Please use a different name or login.`);
-            } else {
-                users[newID] = pass;
-                localStorage.setItem('madani_users', JSON.stringify(users));
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userId);
+                const docSnap = await getDoc(docRef);
                 
-                alert(`Registration Successful!\n\nYour User ID is: ${newID}\n\nPlease remember this ID to login.`);
-                
-                // Auto switch to login and fill ID
-                toggleAuth('login');
-                document.getElementById('login-id').value = newID;
-                document.getElementById('login-pass').focus();
-            }
-        }
-
-        function performLogin(user) {
-            currentUser = user;
-            sessionStorage.setItem('madani_current_user', user);
-            
-            authContainer.style.display = 'none';
-            appContainer.classList.remove('hidden');
-            appContainer.classList.add('flex');
-            document.body.classList.remove('justify-center');
-            
-            document.getElementById('display-username').innerText = user;
-            
-            loadUserData();
-            toggleFormState(); 
-        }
-
-        function logout() {
-            currentUser = null;
-            sessionStorage.removeItem('madani_current_user');
-            location.reload(); 
-        }
-
-        function loadUserData() {
-            if (!currentUser) return;
-            transactions = JSON.parse(localStorage.getItem(`${currentUser}_transactions`)) || [];
-            budgetSettings = JSON.parse(localStorage.getItem(`${currentUser}_budgetSettings`)) || { income: 0, budgets: {} };
-            
-            updateValues();
-            updateBudgetDisplay();
-        }
-
-        function saveUserData() {
-            if (!currentUser) return;
-            localStorage.setItem(`${currentUser}_transactions`, JSON.stringify(transactions));
-            localStorage.setItem(`${currentUser}_budgetSettings`, JSON.stringify(budgetSettings));
-        }
-
-        // ... (Rest of the app logic: addTransaction, updateValues, downloadPDF etc. remains exactly same) ...
-        
-        // Ensure to include all previous functions below (setupDateInput, populateCategorySelect, toggleFormState, etc.)
-        
-        function setupDateInput() {
-            const today = new Date();
-            const min = new Date(today); min.setDate(today.getDate() - 7);
-            const max = new Date(today); max.setDate(today.getDate() + 7);
-            const fmt = d => d.toISOString().split('T')[0];
-            const el = document.getElementById('entry-date');
-            if(el) { el.min = fmt(min); el.max = fmt(max); el.value = fmt(today); }
-        }
-
-        function populateCategorySelect(type) {
-            const descSelect = document.getElementById('desc-select');
-            descSelect.innerHTML = '<option value="" disabled selected>Select Category...</option>';
-            let listToUse = [];
-            
-            if (type === 'income') {
-                listToUse = incomeCategories;
-            } else if (type === 'expense') {
-                listToUse = expenseCategories;
-            } else {
-                listToUse = expenseCategories; 
-            }
-
-            listToUse.forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat.name; 
-                opt.innerText = cat.name;
-                descSelect.appendChild(opt);
-            });
-        }
-
-        function toggleFormState() {
-            const typeInput = document.getElementById('type');
-            const type = typeInput.value;
-            const toAccountContainer = document.getElementById('to-account-container');
-            const categoryWrapper = document.getElementById('category-wrapper');
-            const descSelect = document.getElementById('desc-select');
-            const descText = document.getElementById('desc-text');
-            const accountLabel = document.getElementById('account-label');
-
-            typeInput.className = "w-full p-2 border border-slate-300 rounded-lg text-xs font-bold transition-colors duration-300 focus:ring-1 white-arrow";
-
-            if (type === 'transfer') {
-                typeInput.classList.add('bg-blue-600', 'border-blue-600', 'text-white', 'focus:ring-blue-500');
-                toAccountContainer.classList.remove('hidden');
-                categoryWrapper.classList.add('hidden'); 
-                descSelect.classList.add('hidden');
-                descText.classList.remove('hidden'); descText.placeholder = "e.g. Self Transfer";
-                accountLabel.innerText = "From Account";
-            } else {
-                categoryWrapper.classList.remove('hidden'); 
-                toAccountContainer.classList.add('hidden');
-                accountLabel.innerText = "Account";
-                
-                descSelect.classList.remove('hidden');
-                descText.classList.add('hidden');
-
-                if (type === 'expense') {
-                    typeInput.classList.add('bg-red-600', 'border-red-600', 'text-white', 'focus:ring-red-500');
-                    populateCategorySelect('expense');
+                if(docSnap.exists()) {
+                    alert(`Email ${userId} already exists! Try logging in.`);
                 } else {
-                    typeInput.classList.add('bg-green-600', 'border-green-600', 'text-white', 'focus:ring-green-500');
-                    populateCategorySelect('income');
+                    await setDoc(docRef, {
+                        password: pass,
+                        pin: pin,
+                        transactions: [],
+                        budgetSettings: {income: 0, budgets: {}}
+                    });
+                    alert(`Registered Successfully! Please Login.`);
+                    window.toggleAuth('login');
+                    document.getElementById('login-id').value = userId;
                 }
-            }
-        }
+            } catch(e) { console.error(e); alert("Registration Error"); }
+            showLoading(false);
+        };
 
-        function addTransaction() {
+        window.handleResetPassword = async () => {
+            const userId = document.getElementById('forgot-id').value.trim();
+            const pin = document.getElementById('forgot-pin').value.trim();
+            const newPass = document.getElementById('forgot-pass').value.trim();
+
+            if(!userId || !pin || !newPass) return alert("Fill all fields");
+
+            showLoading(true);
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userId);
+                const docSnap = await getDoc(docRef);
+                
+                if(docSnap.exists()) {
+                    const data = docSnap.data();
+                    if(data.pin === pin) {
+                        await updateDoc(docRef, { password: newPass });
+                        alert("Password Reset Successful! Login now.");
+                        window.toggleAuth('login');
+                    } else {
+                        alert("Incorrect PIN.");
+                    }
+                } else {
+                    alert("User ID not found.");
+                }
+            } catch(e) { console.error(e); alert("Reset Error"); }
+            showLoading(false);
+        };
+
+        window.logout = () => location.reload();
+
+        window.addTransaction = async () => {
+            if(!currentUser) return;
             const type = document.getElementById('type').value;
             const amount = +document.getElementById('amount').value;
             const account = document.getElementById('account-select').value;
@@ -527,255 +547,161 @@
             const dateVal = document.getElementById('entry-date').value;
             const note = document.getElementById('entry-note').value.trim();
             
-            let category = "";
-            let budgetType = null;
+            let category = type !== 'transfer' ? document.getElementById('desc-select').value : 'Transfer';
+            
+            if((type !== 'transfer' && !category) || amount <= 0 || !dateVal) return alert("Invalid Input");
+            if(type === 'transfer' && account === toAccount) return alert("Same Accounts");
 
-            if (type !== 'transfer') {
-                category = document.getElementById('desc-select').value;
-                if (!category) { alert("Please select a Category"); return; }
-                
-                let listToCheck = type === 'income' ? incomeCategories : expenseCategories;
-                const c = listToCheck.find(x => x.name === category);
-                if (c) budgetType = c.type;
-            } else {
-                category = "Transfer"; 
-            }
-
-            if ((type !== 'transfer' && category === '') || amount <= 0 || !dateVal) {
-                alert("Please fill valid details"); return;
-            }
-            if (type === 'transfer' && account === toAccount) {
-                alert("Accounts cannot be same"); return;
-            }
-
-            if (type === 'expense' && budgetSettings.budgets[category]) {
+            if(type === 'expense' && budgetSettings.budgets[category]) {
                 const limit = budgetSettings.budgets[category];
-                const spent = transactions.filter(t => t.type === 'expense' && t.desc === category && t.id !== editingId).reduce((a, b) => a + b.amount, 0);
-                if ((spent + amount) > limit) {
-                    if(!confirm(`⚠️ Over Limit!\nLimit: ₹${limit}\nNew Total: ₹${spent+amount}\nDo you want to continue?`)) return;
+                const spent = transactions.filter(t => t.type === 'expense' && t.desc === category && t.id !== editingId).reduce((a,b)=>a+b.amount,0);
+                if((spent + amount) > limit) {
+                    if(!confirm(`Over Budget! Limit: ${limit}. Proceed?`)) return;
                 }
             }
 
-            const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const newTx = {
+                id: editingId || Date.now(),
+                type, amount, account, toAccount: type==='transfer'?toAccount:null,
+                date: dateVal, note, desc: category,
+                time: new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})
+            };
 
-            if (editingId) {
+            if(editingId) {
                 const idx = transactions.findIndex(t => t.id === editingId);
-                if (idx !== -1) transactions[idx] = { ...transactions[idx], desc: category, note, amount, type, account, toAccount, date: dateVal, time: timeStr, budgetType };
+                if(idx > -1) transactions[idx] = newTx;
                 editingId = null;
-                saveBtn.innerHTML = '<i class="fas fa-plus"></i> <span>Save Entry</span>';
-                cancelEditBtn.classList.add('hidden');
+                resetFormUI();
             } else {
-                transactions.push({
-                    id: Date.now(), desc: category, note, amount, type, account, toAccount, date: dateVal, time: timeStr, budgetType
-                });
+                transactions.push(newTx);
             }
 
-            saveUserData(); 
-            updateValues(); 
-            updateBudgetDisplay();
+            await saveData();
+            updateUI();
             
-            if(type !== 'transfer') document.getElementById('desc-select').value = '';
-            document.getElementById('entry-note').value = ''; 
-            document.getElementById('amount').value = ''; 
-        }
+            document.getElementById('amount').value = '';
+            document.getElementById('entry-note').value = '';
+        };
 
-        function editTransaction(id) {
+        window.editTransaction = (id) => {
             const t = transactions.find(x => x.id === id);
-            if (!t) return;
+            if(!t) return;
             editingId = id;
             
-            const typeInput = document.getElementById('type');
-            typeInput.value = t.type;
-            toggleFormState(); 
+            document.getElementById('type').value = t.type;
+            window.toggleFormState();
             
             setTimeout(() => {
-                if (t.type !== 'transfer') {
-                    document.getElementById('desc-select').value = t.desc;
-                } else {
-                    document.getElementById('desc-text').value = t.desc;
-                }
+                if(t.type !== 'transfer') document.getElementById('desc-select').value = t.desc;
+                else document.getElementById('desc-text').value = t.desc;
             }, 50);
-            
+
             document.getElementById('amount').value = t.amount;
             document.getElementById('account-select').value = t.account;
             document.getElementById('entry-date').value = t.date;
             document.getElementById('entry-note').value = t.note || '';
+            if(t.type === 'transfer') document.getElementById('to-account-select').value = t.toAccount;
 
-            if (t.type === 'transfer') {
-                document.getElementById('to-account-select').value = t.toAccount;
-            }
+            const btn = document.getElementById('save-btn');
+            btn.innerHTML = '<span>Update Entry</span>';
+            btn.classList.replace('bg-blue-700', 'bg-green-600');
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            document.getElementById('entry-form-card').scrollIntoView({behavior:'smooth'});
+        };
 
-            saveBtn.innerHTML = '<i class="fas fa-check"></i> <span>Update Entry</span>';
-            cancelEditBtn.classList.remove('hidden');
-            document.getElementById('entry-form-card').scrollIntoView({behavior: 'smooth'});
-        }
-
-        function resetForm() {
-            editingId = null;
-            document.getElementById('entry-note').value = ''; 
-            document.getElementById('amount').value = ''; 
-            setupDateInput();
-            document.getElementById('desc-select').value = '';
-            saveBtn.innerHTML = '<i class="fas fa-plus"></i> <span>Save Entry</span>';
-            cancelEditBtn.classList.add('hidden');
-        }
-
-        function updateValues() {
-            const income = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
-            const expense = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
-            
-            const getBal = (acc) => transactions.reduce((sum, t) => {
-                if (t.type === 'transfer') {
-                    if (t.account === acc) return sum - t.amount;
-                    if (t.toAccount === acc) return sum + t.amount;
-                    return sum;
+        window.deleteTransaction = async (id, clearAll = false) => {
+            if(!currentUser) return;
+            if(clearAll) {
+                if(confirm("Delete ALL data?")) {
+                    transactions = [];
+                    budgetSettings = {income: 0, budgets: {}};
+                    await saveData();
+                    updateUI();
                 }
-                if (t.account === acc) return t.type === 'income' ? sum + t.amount : sum - t.amount;
-                return sum;
-            }, 0);
+                return;
+            }
+            if(confirm("Delete entry?")) {
+                transactions = transactions.filter(t => t.id !== id);
+                if(editingId === id) window.resetForm();
+                await saveData();
+                updateUI();
+            }
+        };
 
-            const cash = getBal('Cash');
-            const bank = getBal('My Account');
-            const udhar = getBal('Udhar');
+        window.resetForm = () => {
+            editingId = null;
+            resetFormUI();
+            document.getElementById('amount').value = '';
+            document.getElementById('entry-note').value = '';
+        };
 
-            balanceEl.innerText = `₹${(cash + bank + udhar).toFixed(0)}`;
-            incomeEl.innerText = `₹${income.toFixed(0)}`;
-            expenseEl.innerText = `₹${expense.toFixed(0)}`;
-            
-            cashBalanceEl.innerText = `₹${cash}`;
-            bankBalanceEl.innerText = `₹${bank}`;
-            udharBalanceEl.innerText = `₹${udhar}`;
-
-            renderList(); updateChart();
-        }
-
-        function renderList() {
-            listEl.innerHTML = '';
-            const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
-            
-            sorted.forEach(t => {
-                let colorClass = t.type === 'income' ? 'text-green-600' : 'text-red-600';
-                let sign = t.type === 'income' ? '+' : '-';
-                if(t.type === 'transfer') { colorClass = 'text-blue-600'; sign = '⇄'; }
-                
-                const dateParts = t.date.split('-'); 
-                const day = dateParts[2];
-                const month = new Date(t.date).toLocaleString('default', { month: 'short' });
-
-                const li = document.createElement('li');
-                li.className = "bg-white p-2.5 rounded-xl shadow-sm flex justify-between items-center border-l-4 " + (t.type === 'income' ? 'border-green-500' : (t.type === 'expense' ? 'border-red-500' : 'border-blue-500'));
-                li.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="bg-slate-100 p-2 rounded-lg text-center min-w-[3rem]">
-                            <div class="text-[9px] font-bold text-slate-500 uppercase leading-none">${month}</div>
-                            <div class="text-sm font-bold text-slate-800 leading-tight">${day}</div>
-                        </div>
-                        <div class="overflow-hidden">
-                            <div class="text-xs font-bold text-slate-800 truncate">${t.desc}</div>
-                            <div class="text-[10px] text-slate-500 flex flex-wrap gap-x-2 gap-y-0.5">
-                                <span class="font-medium">${t.account} ${t.type === 'transfer' ? '→ ' + t.toAccount : ''}</span>
-                                ${t.note ? `<span class="italic text-slate-400 border-l pl-2 border-slate-300">${t.note}</span>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-right whitespace-nowrap pl-2">
-                        <div class="text-sm font-bold ${colorClass}">${sign}₹${t.amount}</div>
-                        <div class="flex gap-3 justify-end mt-1">
-                            <button onclick="editTransaction(${t.id})" class="text-slate-400 hover:text-blue-500 text-[11px]"><i class="fas fa-pen"></i></button>
-                            <button onclick="removeTransaction(${t.id})" class="text-slate-400 hover:text-red-500 text-[11px]"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                `;
-                listEl.appendChild(li);
-            });
-        }
-
-        // --- BUDGET & CHART ---
-        function toggleBudgetModal() {
-            document.getElementById('budget-modal').classList.toggle('hidden');
-            if(!document.getElementById('budget-modal').classList.contains('hidden')) {
+        window.toggleBudgetModal = () => {
+            const modal = document.getElementById('budget-modal');
+            modal.classList.toggle('hidden');
+            if(!modal.classList.contains('hidden')) {
                 const sel = document.getElementById('modal-cat-select');
-                if (sel.options.length === 0) {
+                if(sel.options.length === 0) {
                     expenseCategories.forEach(c => {
                         const o = document.createElement('option');
-                        o.value = c.name; o.innerText = c.name; sel.appendChild(o);
+                        o.value = c.name; o.text = c.name; sel.add(o);
                     });
                 }
-                loadBudgetForCategory();
+                window.loadBudgetForCategory();
             }
-        }
-        function loadBudgetForCategory() {
+        };
+
+        window.loadBudgetForCategory = () => {
             const cat = document.getElementById('modal-cat-select').value;
             document.getElementById('modal-limit-input').value = budgetSettings.budgets[cat] || '';
-        }
-        function saveSingleBudget() {
+        };
+
+        window.saveSingleBudget = async () => {
             const cat = document.getElementById('modal-cat-select').value;
             const limit = +document.getElementById('modal-limit-input').value;
             if(!cat) return;
-            if (limit > 0) budgetSettings.budgets[cat] = limit;
+            if(limit > 0) budgetSettings.budgets[cat] = limit;
             else delete budgetSettings.budgets[cat];
-            saveUserData();
-            toggleBudgetModal(); updateBudgetDisplay();
-        }
-        function updateBudgetDisplay() {
-            const container = document.getElementById('budget-bars-container');
-            const box = document.getElementById('budget-display');
-            const keys = Object.keys(budgetSettings.budgets);
             
-            if(keys.length === 0) { box.classList.add('hidden'); return; }
-            box.classList.remove('hidden'); container.innerHTML = '';
+            await saveData();
+            window.toggleBudgetModal();
+            updateUI();
+        };
 
-            keys.forEach(cat => {
-                const limit = budgetSettings.budgets[cat];
-                const spent = transactions.filter(t => t.type === 'expense' && t.desc === cat).reduce((a,b)=>a+b.amount,0);
-                const pct = Math.min((spent/limit)*100, 100);
-                const color = spent > limit ? 'bg-red-500' : 'bg-blue-600';
+        window.toggleFormState = () => {
+            const type = document.getElementById('type').value;
+            const typeInput = document.getElementById('type');
+            
+            typeInput.className = "w-full p-2 border border-slate-300 rounded-lg text-xs font-bold transition-colors duration-300 focus:ring-1 white-arrow";
+
+            const catWrap = document.getElementById('category-wrapper');
+            const toAcc = document.getElementById('to-account-container');
+            const descSel = document.getElementById('desc-select');
+            const descTxt = document.getElementById('desc-text');
+
+            if(type === 'transfer') {
+                typeInput.classList.add('bg-blue-600', 'border-blue-600', 'text-white');
+                toAcc.classList.remove('hidden');
+                catWrap.classList.add('hidden');
+                descSel.classList.add('hidden');
+                descTxt.classList.remove('hidden');
+            } else {
+                toAcc.classList.add('hidden');
+                catWrap.classList.remove('hidden');
+                descSel.classList.remove('hidden');
+                descTxt.classList.add('hidden');
                 
-                container.innerHTML += `
-                    <div class="mb-2 last:mb-0">
-                        <div class="flex justify-between text-[10px] mb-1">
-                            <span class="font-bold text-slate-700">${cat}</span>
-                            <span class="${spent>limit?'text-red-500':''} font-bold">₹${spent} / ₹${limit}</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2">
-                            <div class="${color} h-2 rounded-full" style="width:${pct}%"></div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function updateChart() {
-            const exps = transactions.filter(t => t.type === 'expense');
-            if (exps.length === 0) { 
-                if(chartInstance) { chartInstance.destroy(); chartInstance = null; }
-                noDataMsg.classList.remove('hidden'); return; 
+                if(type === 'expense') {
+                    typeInput.classList.add('bg-red-600', 'border-red-600', 'text-white');
+                    populateCats(expenseCategories);
+                } else {
+                    typeInput.classList.add('bg-green-600', 'border-green-600', 'text-white');
+                    populateCats(incomeCategories);
+                }
             }
-            noDataMsg.classList.add('hidden');
-            const data = {};
-            exps.forEach(t => data[t.desc] = (data[t.desc] || 0) + t.amount);
-            
-            const ctx = document.getElementById('expenseChart').getContext('2d');
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(data),
-                    datasets: [{
-                        data: Object.values(data),
-                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 8, font: {size: 10, family: 'Inter'} } } } }
-            });
-        }
+        };
 
-        function removeTransaction(id) { if(confirm("Delete?")) { transactions = transactions.filter(t => t.id !== id); if(editingId===id) resetForm(); saveUserData(); updateValues(); updateBudgetDisplay(); } }
-        function clearAll() { if(confirm("Reset App?")) { transactions = []; budgetSettings={income:0, budgets:{}}; saveUserData(); resetForm(); updateValues(); updateBudgetDisplay(); } }
-
-        // --- PDF GENERATOR (UPDATED LIGHT THEME) ---
-        function downloadPDF() {
+        window.downloadPDF = () => {
+            if(transactions.length === 0) return alert("No data to export");
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
@@ -785,53 +711,35 @@
             const textGray = [100, 116, 139];   
             const accentBlue = [186, 230, 253]; 
 
-            // 1. Header
-            doc.setFillColor(...bgLight); 
-            doc.rect(0, 0, 210, 50, 'F'); 
-            
-            doc.setTextColor(...textDark);
-            doc.setFontSize(24); doc.setFont('helvetica', 'bold');
+            doc.setFillColor(...bgLight); doc.rect(0, 0, 210, 50, 'F'); 
+            doc.setTextColor(...textDark); doc.setFontSize(24); doc.setFont('helvetica', 'bold');
             doc.text("Madani Budget Planner", 105, 25, { align: 'center' });
-            
-            doc.setTextColor(...textGray);
-            doc.setFontSize(11); doc.setFont('helvetica', 'normal');
-            const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-            doc.text(`Financial Report  |  ${today}`, 105, 35, { align: 'center' });
+            doc.setTextColor(...textGray); doc.setFontSize(11); doc.setFont('helvetica', 'normal');
+            doc.text(`Financial Report | ${new Date().toLocaleDateString('en-GB')}`, 105, 35, { align: 'center' });
 
-            // 2. Summary
             const inc = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
             const exp = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
-            const summaryBody = [["0.00", `${inc - exp}`, `${(inc - exp).toFixed(2)}`]];
-
+            
             doc.autoTable({
                 startY: 60,
                 head: [['Opening Balance', 'Total Activity', 'Closing Balance (Net)']],
-                body: summaryBody,
+                body: [["0.00", `${inc - exp}`, `${(inc - exp).toFixed(2)}`]],
                 theme: 'grid',
-                headStyles: { fillColor: [255, 255, 255], textColor: textGray, fontStyle: 'bold', halign: 'left', lineWidth: 0 },
+                headStyles: { fillColor: [255,255,255], textColor: textGray, fontStyle: 'bold', halign: 'left', lineWidth: 0 },
                 bodyStyles: { textColor: textDark, fontStyle: 'bold', fontSize: 12 },
                 columnStyles: { 1: { textColor: [22, 163, 74] }, 2: { textColor: textDark } },
                 styles: { lineColor: [226, 232, 240], lineWidth: 0.1, cellPadding: 6 },
                 margin: { left: 14, right: 14 }
             });
 
-            // 3. Transactions Header
             doc.setFontSize(14); doc.setTextColor(...textDark); doc.setFont('helvetica', 'bold');
             doc.text("Transaction Details", 14, doc.lastAutoTable.finalY + 15);
             doc.setDrawColor(...accentBlue); doc.setLineWidth(0.5);
             doc.line(14, doc.lastAutoTable.finalY + 17, 60, doc.lastAutoTable.finalY + 17);
 
-            // 4. Table
-            const rows = transactions.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(t => {
-                const date = new Date(t.date).toLocaleDateString('en-GB'); 
-                const time = t.time || '-';
-                const desc = `${t.desc} ${t.note ? ' - ' + t.note : ''}`;
-                const account = t.account + (t.type==='transfer' ? ' -> '+t.toAccount : '');
-                const credit = t.type === 'income' ? `+${t.amount}` : '';
-                const debit = t.type === 'expense' ? `-${t.amount}` : '';
-                const amt = t.type === 'transfer' ? `(${t.amount})` : '';
-                return [date, time, desc, account, credit || amt, debit];
-            });
+            const rows = transactions.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(t => [
+                t.date, t.time||'-', `${t.desc} ${t.note?' - '+t.note:''}`, t.account, t.type==='income'?`+${t.amount}`:'', t.type==='expense'?`-${t.amount}`:''
+            ]);
 
             doc.autoTable({
                 startY: doc.lastAutoTable.finalY + 25,
@@ -851,7 +759,6 @@
                 }
             });
 
-            // 5. Border
             const pageCount = doc.internal.getNumberOfPages();
             for(let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -861,39 +768,40 @@
                 doc.text("Madani Budget Planner", 14, 290);
             }
             doc.save('Madani_Budget_Report.pdf');
+        };
+
+        // --- BACKUP & RESTORE ---
+        window.exportData = exportData;
+        window.importData = importData;
+
+        function populateCats(cats) {
+            const sel = document.getElementById('desc-select');
+            sel.innerHTML = '<option value="" disabled selected>Category...</option>';
+            cats.forEach(c => {
+                const o = document.createElement('option');
+                o.value = c.name; o.text = c.name; sel.add(o);
+            });
         }
 
-        // --- BACKUP/RESTORE ---
-        function exportData() {
-            if (!currentUser) { alert("Login required"); return; }
-            const data = { username: currentUser, transactions: transactions, budgetSettings: budgetSettings, exportDate: new Date().toISOString() };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-            const a = document.createElement('a');
-            a.setAttribute("href", dataStr);
-            a.setAttribute("download", `Madani_Budget_Backup_${currentUser}.json`);
-            document.body.appendChild(a); a.click(); a.remove();
+        function showLoading(show) {
+            const el = document.getElementById('loading-overlay');
+            if(show) el.classList.remove('hidden'); else el.classList.add('hidden');
         }
 
-        function importData(input) {
-            if (!currentUser) { alert("Login required"); return; }
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.transactions && Array.isArray(data.transactions)) {
-                        if(confirm("Replace current data?")) {
-                            transactions = data.transactions;
-                            budgetSettings = data.budgetSettings || { income: 0, budgets: {} };
-                            saveUserData(); updateValues(); updateBudgetDisplay();
-                            alert("Data Restored!");
-                        }
-                    }
-                } catch (err) { alert("Error reading file."); }
-                input.value = '';
-            };
-            reader.readAsText(file);
+        function resetFormUI() {
+            const btn = document.getElementById('save-btn');
+            btn.innerHTML = '<span>Save Entry</span>';
+            btn.classList.replace('bg-green-600', 'bg-blue-700');
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        }
+        
+        function setupDateInput() {
+            const today = new Date();
+            const min = new Date(today); min.setDate(today.getDate() - 7);
+            const max = new Date(today); max.setDate(today.getDate() + 7);
+            const fmt = d => d.toISOString().split('T')[0];
+            const el = document.getElementById('entry-date');
+            if(el) { el.min = fmt(min); el.max = fmt(max); el.value = fmt(today); }
         }
     </script>
 </body>
