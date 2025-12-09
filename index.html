@@ -213,6 +213,11 @@
             }
         })();
 
+        // AUTH HELPER
+        async function ensureAuth() {
+            if (!auth.currentUser) await signInAnonymously(auth);
+        }
+
         // --- AUTH FUNCTIONS ---
         window.toggleAuth = (mode) => {
             ['login-form','register-form','forgot-form'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -232,12 +237,12 @@
             const user = document.getElementById('login-id').value.trim().toLowerCase();
             const pass = document.getElementById('login-pass').value.trim();
             if(!user || !pass) return alert("Enter Email and Password");
-            if(!auth.currentUser) await signInAnonymously(auth);
-
+            
+            await ensureAuth();
             showLoading(true);
             try {
-                const safeId = user.replace(/\./g, '_dot_'); // Sanitize email for ID
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', safeId);
+                const safeId = user.replace(/[^a-z0-9]/g, '_'); 
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'budget_users_shared', safeId);
                 const docSnap = await getDoc(docRef);
                 
                 if(docSnap.exists()) {
@@ -261,12 +266,12 @@
             if(!email || !pass || !pin) return alert("Fill all fields");
             if(!email.includes('@')) return alert("Enter valid email");
             if(pin.length !== 4) return alert("PIN must be 4 digits");
-            if(!auth.currentUser) await signInAnonymously(auth);
-
+            
+            await ensureAuth();
             showLoading(true);
             try {
-                const safeId = email.replace(/\./g, '_dot_');
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', safeId);
+                const safeId = email.replace(/[^a-z0-9]/g, '_');
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'budget_users_shared', safeId);
                 const docSnap = await getDoc(docRef);
                 
                 if(docSnap.exists()) {
@@ -286,12 +291,12 @@
             const pin = document.getElementById('forgot-pin').value.trim();
             const newPass = document.getElementById('forgot-pass').value.trim();
             if(!email || !pin || !newPass) return alert("Fill all fields");
-            if(!auth.currentUser) await signInAnonymously(auth);
-
+            
+            await ensureAuth();
             showLoading(true);
             try {
-                const safeId = email.replace(/\./g, '_dot_');
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', safeId);
+                const safeId = email.replace(/[^a-z0-9]/g, '_');
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'budget_users_shared', safeId);
                 const docSnap = await getDoc(docRef);
                 
                 if(docSnap.exists() && docSnap.data().pin === pin) {
@@ -312,7 +317,6 @@
             document.getElementById('app-container').classList.add('flex');
             document.body.classList.remove('justify-center');
             document.getElementById('display-username').innerText = currentUser.split('@')[0];
-            // Ensure dropdown is populated correctly on load
             window.toggleFormState();
             updateUI();
         }
@@ -320,8 +324,9 @@
         async function saveData() {
             if(!currentUser) return;
             try {
-                const safeId = currentUser.replace(/\./g, '_dot_');
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', safeId);
+                await ensureAuth();
+                const safeId = currentUser.replace(/[^a-z0-9]/g, '_');
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'budget_users_shared', safeId);
                 await updateDoc(docRef, { transactions: transactions, budgetSettings: budgetSettings });
             } catch(e) { console.error(e); }
         }
@@ -374,7 +379,6 @@
             document.getElementById('type').value = t.type;
             window.toggleFormState();
             
-            // Allow DOM update
             setTimeout(() => {
                 if(t.type !== 'transfer') document.getElementById('desc-select').value = t.desc;
                 else document.getElementById('desc-text').value = t.desc;
