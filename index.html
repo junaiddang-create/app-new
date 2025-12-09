@@ -15,8 +15,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f3f4f6; }
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Segoe+UI:wght@400;600;700&display=swap');
+        
+        body { font-family: 'Segoe UI', 'Noto Nastaliq Urdu', sans-serif; background-color: #f0f4f8; }
+        .urdu-text { font-family: 'Noto Nastaliq Urdu', serif; }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
         .progress-bar { transition: width 1s ease-in-out; }
         .scroller::-webkit-scrollbar { width: 4px; }
         .scroller::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
@@ -24,67 +27,77 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center p-3">
 
-    <!-- Header (Simplified) -->
-    <header class="w-full max-w-md bg-indigo-600 text-white p-4 rounded-xl shadow-lg mb-3">
+    <!-- Header -->
+    <header class="w-full max-w-md bg-blue-900 text-white p-4 rounded-xl shadow-lg mb-3">
         <div class="flex justify-between items-center mb-2">
             <div>
-                <h1 class="text-base font-bold"><i class="fas fa-wallet mr-1"></i>Madani Planner</h1>
+                <h1 class="text-lg font-bold flex items-center gap-2">
+                    <i class="fas fa-wallet"></i>
+                    <div class="flex flex-col">
+                        <span>Madani Budget</span>
+                        <span class="text-[10px] font-normal opacity-80 urdu-text">مدنی بجٹ پلانر</span>
+                    </div>
+                </h1>
             </div>
             <div class="text-right">
-                <p class="text-[9px] text-indigo-200">Total Net Worth</p>
+                <p class="text-[9px] text-blue-200">Kul Maaliyat (Total Net Worth)</p>
                 <h2 class="text-xl font-bold" id="total-balance">₹0</h2>
             </div>
         </div>
 
-        <!-- 3 Accounts (Compact) -->
+        <!-- 3 Accounts -->
         <div class="grid grid-cols-3 gap-2">
-            <div class="bg-indigo-800/40 p-1.5 rounded-lg text-center border border-indigo-500/30">
-                <p class="text-[8px] text-indigo-200 uppercase tracking-wider">Cash</p>
+            <div class="bg-blue-800/50 p-1.5 rounded-lg text-center border border-blue-500/30">
+                <p class="text-[8px] text-blue-200 uppercase tracking-wider">Naqad (Cash)</p>
                 <p class="text-xs font-bold" id="cash-balance">₹0</p>
             </div>
-            <div class="bg-indigo-800/40 p-1.5 rounded-lg text-center border border-indigo-500/30">
-                <p class="text-[8px] text-indigo-200 uppercase tracking-wider">Bank</p>
+            <div class="bg-blue-800/50 p-1.5 rounded-lg text-center border border-blue-500/30">
+                <p class="text-[8px] text-blue-200 uppercase tracking-wider">Bank Account</p>
                 <p class="text-xs font-bold" id="bank-balance">₹0</p>
             </div>
-            <div class="bg-indigo-800/40 p-1.5 rounded-lg text-center border border-indigo-500/30">
-                <p class="text-[8px] text-indigo-200 uppercase tracking-wider">Udhar</p>
+            <div class="bg-blue-800/50 p-1.5 rounded-lg text-center border border-blue-500/30">
+                <p class="text-[8px] text-blue-200 uppercase tracking-wider">Udhar</p>
                 <p class="text-xs font-bold text-yellow-300" id="udhar-balance">₹0</p>
             </div>
         </div>
     </header>
 
-    <!-- Budget Progress (Compact) -->
+    <!-- Budget Progress -->
     <div id="budget-display" class="w-full max-w-md bg-white p-3 rounded-xl card-shadow mb-3 hidden">
-        <h3 class="text-gray-700 font-bold mb-2 text-[10px] border-b pb-1 uppercase tracking-wide">Budget Status</h3>
+        <h3 class="text-gray-700 font-bold mb-2 text-[10px] border-b pb-1 uppercase tracking-wide flex justify-between">
+            <span>Budget Hadaf</span>
+            <span class="urdu-text text-xs">بجٹ کا ہدف</span>
+        </h3>
         <div id="budget-bars-container" class="space-y-2 max-h-32 overflow-y-auto scroller pr-1"></div>
     </div>
 
-    <!-- New Entry Form (Super Compact & Integrated Button) -->
+    <!-- New Entry Form -->
     <div class="w-full max-w-md bg-white p-3 rounded-xl card-shadow mb-3" id="entry-form-card">
-        <!-- Header Row: Title + Budget Button -->
         <div class="flex justify-between items-center mb-2 border-b pb-1">
-            <h3 class="text-gray-800 font-bold text-sm" id="form-title">New Entry</h3>
+            <h3 class="text-gray-800 font-bold text-sm flex items-center gap-1">
+                New Entry <span class="text-xs text-gray-400 urdu-text">(نئی انٹری)</span>
+            </h3>
             <div class="flex gap-2">
-                <button onclick="toggleBudgetModal()" class="text-[10px] bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-2 py-1 rounded border border-indigo-200 font-semibold transition-colors">
-                    <i class="fas fa-sliders-h mr-1"></i>Set Limits
+                <button onclick="toggleBudgetModal()" class="text-[10px] bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded border border-blue-200 font-semibold transition-colors">
+                    <i class="fas fa-sliders-h mr-1"></i>Hadaf (Limits)
                 </button>
                 <button onclick="resetForm()" id="cancel-edit-btn" class="hidden text-[10px] text-red-500 hover:text-red-700 font-bold uppercase">Cancel</button>
             </div>
         </div>
         
         <div class="space-y-2">
-            <!-- Row 1: Date (Very Small) & Type -->
+            <!-- Row 1: Date & Type -->
             <div class="flex gap-2">
                 <div class="w-1/4">
-                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Date</label>
-                    <input type="date" id="entry-date" class="w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] font-semibold focus:outline-none focus:border-indigo-500">
+                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Tareekh (Date)</label>
+                    <input type="date" id="entry-date" class="w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] font-semibold focus:outline-none focus:border-blue-500">
                 </div>
                 <div class="w-3/4">
-                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Type</label>
+                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Qisam (Type)</label>
                     <select id="type" onchange="toggleFormState()" class="w-full p-1.5 border rounded text-[10px] font-bold transition-colors duration-300">
-                        <option value="income">Income (+)</option>
-                        <option value="expense">Expense (-)</option>
-                        <option value="transfer">Transfer (⇄)</option>
+                        <option value="income">Aamdani (Income +)</option>
+                        <option value="expense">Akhrajat (Expense -)</option>
+                        <option value="transfer">Mun taqilee (Transfer ⇄)</option>
                     </select>
                 </div>
             </div>
@@ -94,81 +107,87 @@
                 <div class="w-1/2" id="from-account-wrapper">
                     <label id="account-label" class="block text-[9px] font-bold text-gray-400 mb-0.5">Account</label>
                     <select id="account-select" class="w-full p-1.5 bg-indigo-50 border border-indigo-100 rounded text-[10px] font-semibold text-indigo-900 focus:outline-none">
-                        <option value="Cash">💵 Cash</option>
-                        <option value="My Account">🏦 Bank</option>
-                        <option value="Udhar">🤝 Udhar</option>
+                        <option value="Cash">Naqad (Cash)</option>
+                        <option value="My Account">Bank Account</option>
+                        <option value="Udhar">Udhar</option>
                     </select>
                 </div>
                 <div class="w-1/2 hidden" id="to-account-container">
-                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">To Account</label>
+                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Kisko (To)</label>
                     <select id="to-account-select" class="w-full p-1.5 bg-green-50 border border-green-100 rounded text-[10px] font-semibold text-green-900 focus:outline-none">
-                        <option value="My Account">🏦 Bank</option>
-                        <option value="Cash">💵 Cash</option>
-                        <option value="Udhar">🤝 Udhar</option>
+                        <option value="My Account">Bank Account</option>
+                        <option value="Cash">Naqad (Cash)</option>
+                        <option value="Udhar">Udhar</option>
                     </select>
                 </div>
                 
                 <!-- Category Dropdown -->
                 <div class="w-1/2" id="category-wrapper">
-                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Category</label>
-                    <select id="desc-select" class="hidden w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] focus:outline-none focus:border-indigo-500">
+                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Mad (Category)</label>
+                    <select id="desc-select" class="hidden w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] focus:outline-none focus:border-blue-500">
                         <!-- JS Populates -->
                     </select>
-                    <input type="text" id="desc-text" list="income-list" placeholder="Source..." class="w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="desc-text" list="income-list" placeholder="Source..." class="w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] focus:outline-none focus:border-blue-500">
                     <datalist id="income-list">
-                        <option value="Salary"></option>
+                        <option value="Salary (Tankhwah)"></option>
                         <option value="Bonus"></option>
-                        <option value="Gift"></option>
+                        <option value="Gift (Tohfa)"></option>
                     </datalist>
                 </div>
             </div>
 
-            <!-- Row 3: Amount & Note (Description) -->
+            <!-- Row 3: Amount & Note -->
             <div class="flex gap-2">
                 <div class="w-1/3">
-                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Amount</label>
-                    <input type="number" id="amount" placeholder="0" class="w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] font-bold text-gray-700 focus:outline-none focus:border-indigo-500">
+                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Raqam (Amount)</label>
+                    <input type="number" id="amount" placeholder="0" class="w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] font-bold text-gray-700 focus:outline-none focus:border-blue-500">
                 </div>
                 <div class="w-2/3">
-                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Description / Note</label>
-                    <input type="text" id="entry-note" placeholder="Details (e.g. Pizza)" class="w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] focus:outline-none focus:border-indigo-500">
+                    <label class="block text-[9px] font-bold text-gray-400 mb-0.5">Tafseel (Note)</label>
+                    <input type="text" id="entry-note" placeholder="Details..." class="w-full p-1.5 bg-gray-50 border border-gray-200 rounded text-[10px] focus:outline-none focus:border-blue-500">
                 </div>
             </div>
 
-            <button id="save-btn" onclick="addTransaction()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg transition duration-300 shadow-sm mt-1 text-[10px] uppercase tracking-wide">
-                <i class="fas fa-plus mr-1"></i> Save Entry
+            <button id="save-btn" onclick="addTransaction()" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 rounded-lg transition duration-300 shadow-sm mt-1 text-[10px] uppercase tracking-wide">
+                <i class="fas fa-plus mr-1"></i> Save (Mahfooz Karein)
             </button>
         </div>
     </div>
 
-    <!-- Summary (Income/Expense) -->
+    <!-- Summary -->
     <div class="w-full max-w-md grid grid-cols-2 gap-3 mb-3">
         <div class="bg-white p-2 rounded-lg card-shadow border-l-2 border-green-500 flex justify-between items-center">
-            <p class="text-gray-400 text-[9px] font-bold uppercase">Income</p>
+            <div class="flex flex-col">
+                <p class="text-gray-400 text-[9px] font-bold uppercase">Aamdani</p>
+                <p class="text-[8px] text-gray-300">Income</p>
+            </div>
             <p class="text-green-600 text-sm font-bold" id="total-income">₹0</p>
         </div>
         <div class="bg-white p-2 rounded-lg card-shadow border-l-2 border-red-500 flex justify-between items-center">
-            <p class="text-gray-400 text-[9px] font-bold uppercase">Expense</p>
+            <div class="flex flex-col">
+                <p class="text-gray-400 text-[9px] font-bold uppercase">Akhrajat</p>
+                <p class="text-[8px] text-gray-300">Expense</p>
+            </div>
             <p class="text-red-600 text-sm font-bold" id="total-expense">₹0</p>
         </div>
     </div>
 
-    <!-- Analysis Chart (Small) -->
+    <!-- Chart -->
     <div class="w-full max-w-md bg-white p-3 rounded-xl card-shadow mb-3">
-        <h3 class="text-gray-700 font-bold mb-2 text-[10px] uppercase tracking-wide text-center">Breakdown</h3>
+        <h3 class="text-gray-700 font-bold mb-2 text-[10px] uppercase tracking-wide text-center">Jaiza (Analysis)</h3>
         <div class="relative h-24 w-full flex justify-center">
             <canvas id="expenseChart"></canvas>
         </div>
         <p id="no-data-msg" class="text-center text-gray-300 text-[10px] mt-2 hidden">No data available</p>
     </div>
 
-    <!-- History List -->
+    <!-- History -->
     <div class="w-full max-w-md">
         <div class="flex justify-between items-end mb-2">
             <h3 class="text-gray-700 font-bold text-xs">Recent History</h3>
             <div class="flex items-center gap-2">
-                <button onclick="downloadPDF()" class="text-[9px] flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                    <i class="fas fa-file-pdf"></i> PDF
+                <button onclick="downloadPDF()" class="text-[9px] flex items-center gap-1 text-blue-700 hover:text-blue-900 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                    <i class="fas fa-file-pdf"></i> Madani PDF
                 </button>
                 <button onclick="clearAll()" class="text-[9px] text-red-400 hover:text-red-600">Clear</button>
             </div>
@@ -176,20 +195,20 @@
         <ul id="list" class="space-y-2 pb-10"></ul>
     </div>
 
-    <!-- MODAL (Budget Settings) -->
+    <!-- BUDGET MODAL -->
     <div id="budget-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-xs flex flex-col animate-fade-in-up">
             <div class="p-3 border-b flex justify-between items-center">
-                <h3 class="text-sm font-bold text-gray-800">Set Category Limit</h3>
+                <h3 class="text-sm font-bold text-gray-800">Hadaf Set Karein (Limits)</h3>
                 <button onclick="toggleBudgetModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-4 space-y-3">
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Select Category</label>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Mad Muntakhib Karein (Select Category)</label>
                     <select id="modal-cat-select" onchange="loadBudgetForCategory()" class="w-full p-2 bg-indigo-50 border border-indigo-100 rounded text-xs font-bold text-indigo-900 focus:outline-none"></select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Max Monthly Limit</label>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Mahana Hadaf (Monthly Limit)</label>
                     <div class="relative">
                         <span class="absolute left-3 top-2 text-gray-400 text-xs">₹</span>
                         <input type="number" id="modal-limit-input" placeholder="0" class="w-full pl-6 p-2 bg-white border border-gray-300 rounded text-sm font-bold text-gray-800 focus:border-indigo-500 outline-none">
@@ -197,8 +216,8 @@
                 </div>
             </div>
             <div class="p-3 border-t bg-gray-50 rounded-b-xl">
-                <button onclick="saveSingleBudget()" class="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700 shadow-md">
-                    Save Limit
+                <button onclick="saveSingleBudget()" class="w-full py-2 bg-blue-800 text-white text-xs font-bold rounded hover:bg-blue-900 shadow-md">
+                    Save Hadaf
                 </button>
             </div>
         </div>
@@ -207,14 +226,19 @@
     <script>
         // --- DATA ---
         const appCategories = [
-            { name: "Rent (Kiraya)", type: "needs" }, { name: "Groceries (Rashan)", type: "needs" },
-            { name: "Bills (Bijli/Water)", type: "needs" }, { name: "School Fees", type: "needs" },
-            { name: "Medical", type: "needs" }, { name: "Transport/Petrol", type: "needs" },
-            { name: "Mobile/Net", type: "needs" }, { name: "Food/Hotel", type: "wants" },
-            { name: "Shopping", type: "wants" }, { name: "Entertainment", type: "wants" },
-            { name: "Travel", type: "wants" }, { name: "Gifts/Sadqa", type: "wants" },
-            { name: "Savings", type: "savings" }, { name: "Committee (BC)", type: "savings" },
-            { name: "Other", type: "wants" }
+            { name: "Rent (Kiraya)", type: "needs" }, 
+            { name: "Groceries (Rashan)", type: "needs" },
+            { name: "Bills (Bijli/Water)", type: "needs" }, 
+            { name: "Fees (School/Madrasa)", type: "needs" },
+            { name: "Medical (Dawa)", type: "needs" }, 
+            { name: "Petrol/Transport", type: "needs" },
+            { name: "Mobile/Internet", type: "needs" }, 
+            { name: "Food/Hotel", type: "wants" },
+            { name: "Shopping (Kapde etc)", type: "wants" }, 
+            { name: "Gifts/Sadqa", type: "wants" },
+            { name: "Digar Akhrajat (Other)", type: "wants" },
+            { name: "Bachat (Savings)", type: "savings" }, 
+            { name: "Committee (BC)", type: "savings" }
         ];
 
         let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
@@ -242,15 +266,16 @@
         const noDataMsg = document.getElementById('no-data-msg');
         const dateInput = document.getElementById('entry-date');
         const saveBtn = document.getElementById('save-btn');
-        const formTitle = document.getElementById('form-title');
         const cancelEditBtn = document.getElementById('cancel-edit-btn');
 
         // Init
-        updateValues();
-        toggleFormState();
-        updateBudgetDisplay();
-        populateCategorySelect();
-        setupDateInput();
+        window.onload = function() {
+            populateCategorySelect();
+            setupDateInput();
+            updateValues();
+            updateBudgetDisplay();
+            toggleFormState();
+        };
 
         // --- CORE LOGIC ---
         function setupDateInput() {
@@ -263,7 +288,7 @@
         }
 
         function populateCategorySelect() {
-            descSelect.innerHTML = '<option value="" disabled selected>Select...</option>';
+            descSelect.innerHTML = '<option value="" disabled selected>Select Category...</option>';
             appCategories.forEach(cat => {
                 const opt = document.createElement('option');
                 opt.value = cat.name; opt.innerText = cat.name;
@@ -278,22 +303,22 @@
             if (type === 'transfer') {
                 typeInput.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-700');
                 toAccountContainer.classList.remove('hidden');
-                categoryWrapper.classList.add('hidden'); // Hide category for transfer
+                categoryWrapper.classList.add('hidden'); 
                 descSelect.classList.add('hidden');
                 descText.classList.remove('hidden'); descText.placeholder = "e.g. Self Transfer";
             } else {
-                // Show category wrapper for both Income & Expense
                 categoryWrapper.classList.remove('hidden'); 
                 toAccountContainer.classList.add('hidden');
 
                 if (type === 'expense') {
                     typeInput.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
-                    descSelect.classList.remove('hidden');
+                    descSelect.classList.remove('hidden'); 
                     descText.classList.add('hidden');
                 } else {
                     typeInput.classList.add('bg-green-50', 'border-green-200', 'text-green-700');
-                    descSelect.classList.add('hidden');
-                    descText.classList.remove('hidden'); descText.placeholder = "Source...";
+                    descSelect.classList.add('hidden');    
+                    descText.classList.remove('hidden');   
+                    descText.placeholder = "Source (e.g. Salary)...";
                 }
             }
         }
@@ -311,17 +336,17 @@
 
             if (type === 'expense') {
                 category = descSelect.value;
-                if (!category) { alert("Select a Category"); return; }
+                if (!category) { alert("Please select a Category (Mad Muntakhib Karein)"); return; }
                 const c = appCategories.find(x => x.name === category);
                 if (c) budgetType = c.type;
             } else if (type === 'income') {
                 category = descText.value.trim();
             } else {
-                category = "Transfer"; // Default for transfer
+                category = "Transfer"; 
             }
 
             if ((type !== 'transfer' && category === '') || amount <= 0 || !dateVal) {
-                alert("Please fill details correctly"); return;
+                alert("Please fill valid details (Barae karam durust maloomat dein)"); return;
             }
             if (type === 'transfer' && account === toAccount) {
                 alert("Accounts cannot be same"); return;
@@ -332,7 +357,7 @@
                 const limit = budgetSettings.budgets[category];
                 const spent = transactions.filter(t => t.type === 'expense' && t.desc === category && t.id !== editingId).reduce((a, b) => a + b.amount, 0);
                 if ((spent + amount) > limit) {
-                    if(!confirm(`⚠️ Over Budget!\nLimit: ₹${limit}\nNew Total: ₹${spent+amount}\nProceed?`)) return;
+                    if(!confirm(`⚠️ Hadaf se zyada!\nLimit: ₹${limit}\nNew Total: ₹${spent+amount}\nKya aap jari rakhna chahte hain?`)) return;
                 }
             }
 
@@ -342,9 +367,7 @@
                 const idx = transactions.findIndex(t => t.id === editingId);
                 if (idx !== -1) transactions[idx] = { ...transactions[idx], desc: category, note, amount, type, account, toAccount, date: dateVal, time: timeStr, budgetType };
                 editingId = null;
-                saveBtn.innerHTML = '<i class="fas fa-plus mr-1"></i> Save Entry';
-                saveBtn.classList.replace('bg-green-600', 'bg-indigo-600');
-                formTitle.innerText = "New Entry";
+                saveBtn.innerHTML = '<i class="fas fa-plus mr-1"></i> Save (Mahfooz)';
                 cancelEditBtn.classList.add('hidden');
             } else {
                 transactions.push({
@@ -353,8 +376,9 @@
             }
 
             updateLocalStorage(); updateValues(); updateBudgetDisplay();
-            descText.value = ''; entryNote.value = ''; amountInput.value = ''; 
-            // Keep Type same for faster entry
+            if(type === 'income') descText.value = ''; 
+            if(type === 'expense') descSelect.value = '';
+            entryNote.value = ''; amountInput.value = ''; 
         }
 
         function editTransaction(id) {
@@ -378,9 +402,7 @@
                 descText.value = t.desc;
             }
 
-            saveBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Update Entry';
-            saveBtn.classList.replace('bg-indigo-600', 'bg-green-600');
-            formTitle.innerText = "Edit Entry";
+            saveBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Update (Tabdeel)';
             cancelEditBtn.classList.remove('hidden');
             document.getElementById('entry-form-card').scrollIntoView({behavior: 'smooth'});
         }
@@ -389,9 +411,7 @@
             editingId = null;
             descText.value = ''; entryNote.value = ''; amountInput.value = '';
             setupDateInput();
-            saveBtn.innerHTML = '<i class="fas fa-plus mr-1"></i> Save Entry';
-            saveBtn.classList.replace('bg-green-600', 'bg-indigo-600');
-            formTitle.innerText = "New Entry";
+            saveBtn.innerHTML = '<i class="fas fa-plus mr-1"></i> Save (Mahfooz)';
             cancelEditBtn.classList.add('hidden');
         }
 
@@ -434,7 +454,7 @@
                 let sign = t.type === 'income' ? '+' : '-';
                 if(t.type === 'transfer') { colorClass = 'text-blue-600'; sign = '⇄'; }
                 
-                const dateParts = t.date.split('-'); // YYYY-MM-DD
+                const dateParts = t.date.split('-'); 
                 const day = dateParts[2];
                 const month = new Date(t.date).toLocaleString('default', { month: 'short' });
 
@@ -501,17 +521,12 @@
             if(keys.length === 0) { box.classList.add('hidden'); return; }
             box.classList.remove('hidden'); container.innerHTML = '';
 
-            const totalIncome = transactions.filter(t => t.type === 'income').reduce((a,b)=>a+b.amount,0);
-
             keys.forEach(cat => {
                 const limit = budgetSettings.budgets[cat];
                 const spent = transactions.filter(t => t.type === 'expense' && t.desc === cat).reduce((a,b)=>a+b.amount,0);
                 const pct = Math.min((spent/limit)*100, 100);
-                const color = spent > limit ? 'bg-red-500' : 'bg-indigo-500';
+                const color = spent > limit ? 'bg-red-500' : 'bg-blue-500';
                 
-                // % of Income
-                const incPct = totalIncome > 0 ? ((spent/totalIncome)*100).toFixed(1) : 0;
-
                 container.innerHTML += `
                     <div class="mb-2">
                         <div class="flex justify-between text-[10px] mb-0.5">
@@ -520,9 +535,6 @@
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-1.5 mb-0.5">
                             <div class="${color} h-1.5 rounded-full" style="width:${pct}%"></div>
-                        </div>
-                        <div class="text-[9px] text-gray-400 text-right">
-                            ${incPct}% of Income
                         </div>
                     </div>
                 `;
@@ -547,7 +559,7 @@
                     labels: Object.keys(data),
                     datasets: [{
                         data: Object.values(data),
-                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
+                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
                         borderWidth: 0
                     }]
                 },
@@ -559,37 +571,98 @@
         function clearAll() { if(confirm("Reset App?")) { transactions = []; budgetSettings={income:0, budgets:{}}; updateLocalStorage(); localStorage.removeItem('budgetSettings'); updateValues(); updateBudgetDisplay(); } }
         function updateLocalStorage() { localStorage.setItem('transactions', JSON.stringify(transactions)); }
 
+        // --- PDF GENERATOR (NAVY BLUE THEME) ---
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const green = [22, 163, 74];
             
-            doc.setFillColor(...green); doc.rect(0, 0, 210, 35, 'F');
-            doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text("Madani Budget Planner", 14, 18);
-            doc.setFontSize(10); doc.text("Personal Finance Report", 14, 25);
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 196, 18, {align:'right'});
+            // 1. Navy Blue Header (#1e3a8a - approximate)
+            const navyBlue = [30, 58, 138]; 
+            const white = [255, 255, 255];
+            const gray = [240, 240, 240];
 
-            // Summary
+            // Header Background
+            doc.setFillColor(...navyBlue);
+            doc.rect(0, 0, 210, 45, 'F');
+            
+            // App Title (English & Urdu approximation)
+            doc.setTextColor(...white);
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text("Madani Budget Planner", 105, 20, { align: 'center' });
+            
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'normal');
+            doc.text("(Madani Budget Planner)", 105, 28, { align: 'center' }); // Urdu placeholder
+
+            doc.setFontSize(10);
+            const today = new Date().toLocaleDateString('en-GB');
+            doc.text(`Report Date: ${today}`, 105, 38, { align: 'center' });
+
+            // 2. Summary Table (Opening, Activity, Closing)
             const inc = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
             const exp = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
-            
-            doc.setTextColor(0,0,0);
-            doc.text(`Total Income: ${inc}`, 14, 45);
-            doc.text(`Total Expense: ${exp}`, 80, 45);
-            doc.text(`Net Balance: ${inc-exp}`, 150, 45);
+            const net = inc - exp;
 
-            const rows = transactions.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(t => [
-                t.date, t.desc, t.type, t.note || '-', (t.type==='expense'?'-':'+')+t.amount
-            ]);
+            const summaryBody = [[
+                "0.00", 
+                `${inc - exp}`, 
+                `${(inc - exp).toFixed(2)}`
+            ]];
 
             doc.autoTable({
-                head: [['Date', 'Category', 'Type', 'Note', 'Amount']],
-                body: rows,
                 startY: 55,
-                theme: 'striped',
-                headStyles: { fillColor: green }
+                head: [['Opening Balance', 'Total Activity', 'Closing Balance (Net)']],
+                body: summaryBody,
+                theme: 'grid',
+                headStyles: { fillColor: gray, textColor: 50, fontStyle: 'bold', halign: 'left' },
+                bodyStyles: { textColor: 50, fontStyle: 'bold' },
+                columnStyles: {
+                    0: { halign: 'left' },
+                    1: { halign: 'left', textColor: [22, 163, 74] }, // Greenish for activity
+                    2: { halign: 'left', textColor: [30, 58, 138] }  // Blue for closing
+                },
+                styles: { lineColor: 200, lineWidth: 0.1 }
             });
-            doc.save('Budget_Statement.pdf');
+
+            // 3. Transactions Header
+            doc.setFontSize(12);
+            doc.setTextColor(30, 58, 138); // Navy
+            doc.text("Transaction Details (Lein Dein ki Tafseel)", 14, doc.lastAutoTable.finalY + 15);
+
+            // 4. Detailed Table
+            const rows = transactions.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(t => {
+                const date = t.date;
+                const time = t.time || '-';
+                const desc = `${t.desc} ${t.note ? ' - ' + t.note : ''}`;
+                const account = t.account + (t.type==='transfer' ? ' -> '+t.toAccount : '');
+                
+                // Credit (Income) or Debit (Expense)
+                const credit = t.type === 'income' ? `+${t.amount}` : '';
+                const debit = t.type === 'expense' ? `-${t.amount}` : '';
+                
+                // If transfer, maybe show in both or just separate? keeping simple
+                const amt = t.type === 'transfer' ? `(${t.amount})` : '';
+
+                return [date, time, desc, account, credit || amt, debit];
+            });
+
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                head: [['Tareekh (Date)', 'Waqt', 'Tafseel (Description)', 'Account', 'Aamdani (Credit)', 'Akhrajat (Debit)']],
+                body: rows,
+                theme: 'grid',
+                headStyles: { fillColor: gray, textColor: 50, fontStyle: 'bold' },
+                bodyStyles: { textColor: 80, fontSize: 9 },
+                columnStyles: {
+                    4: { textColor: [22, 163, 74], halign: 'right', fontStyle: 'bold' }, // Green Credit
+                    5: { textColor: [220, 38, 38], halign: 'right', fontStyle: 'bold' }  // Red Debit
+                },
+                alternateRowStyles: { fillColor: [250, 250, 250] },
+                styles: { cellPadding: 3 }
+            });
+
+            doc.save('Madani_Budget_Report.pdf');
         }
     </script>
 </body>
