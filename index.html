@@ -4,60 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Madani Budget Planner</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f0f4f8; 
-            -webkit-font-smoothing: antialiased;
-        }
-        
-        select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-
-        select.white-arrow {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-        }
-
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; -webkit-font-smoothing: antialiased; }
+        select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+        select.white-arrow { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); }
         .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
         .progress-bar { transition: width 1s ease-in-out; }
         .scroller::-webkit-scrollbar { width: 4px; }
         .scroller::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Spinner */
         .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3498db; width: 20px; height: 20px; -webkit-animation: spin 1s linear infinite; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-3 text-slate-800">
 
-    <!-- ================= LOADING OVERLAY ================= -->
     <div id="loading-overlay" class="fixed inset-0 bg-white/80 z-[60] hidden flex items-center justify-center">
         <div class="loader"></div>
     </div>
 
-    <!-- ================= AUTHENTICATION SCREEN ================= -->
+    <!-- AUTH SCREEN -->
     <div id="auth-container" class="w-full max-w-sm bg-white p-8 rounded-2xl shadow-xl fade-in">
         <div class="text-center mb-6">
             <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -67,391 +41,203 @@
             <p class="text-xs text-slate-500">Cloud Sync & Secure</p>
         </div>
 
-        <!-- LOGIN FORM -->
         <div id="login-form" class="space-y-4">
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Email ID (Gmail)</label>
-                <input type="email" id="login-id" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="e.g. ali@gmail.com">
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Email ID</label>
+                <input type="email" id="login-id" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. ali@gmail.com">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Password</label>
                 <div class="relative">
-                    <input type="password" id="login-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10" placeholder="Enter Password">
-                    <button onclick="togglePass('login-pass', this)" class="absolute right-3 top-3 text-slate-400 hover:text-blue-500 focus:outline-none">
-                        <i class="fas fa-eye"></i>
-                    </button>
+                    <input type="password" id="login-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 pr-10" placeholder="Enter Password">
+                    <button onclick="togglePass('login-pass', this)" class="absolute right-3 top-3 text-slate-400 hover:text-blue-500 focus:outline-none"><i class="fas fa-eye"></i></button>
                 </div>
-                <div class="text-right mt-1">
-                    <button onclick="toggleAuth('forgot')" class="text-xs text-blue-500 hover:underline">Forgot Password?</button>
-                </div>
+                <div class="text-right mt-1"><button onclick="toggleAuth('forgot')" class="text-xs text-blue-500 hover:underline">Forgot Password?</button></div>
             </div>
-            
-            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md flex justify-center items-center gap-2">
-                <span>Login</span>
-            </button>
-            
-            <div class="text-center text-xs text-slate-400 mt-2">
-                New user? <button onclick="toggleAuth('register')" class="text-blue-500 hover:underline font-bold">Register with Email</button>
-            </div>
+            <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md">Login</button>
+            <div class="text-center text-xs text-slate-400 mt-2">New user? <button onclick="toggleAuth('register')" class="text-blue-500 hover:underline font-bold">Register</button></div>
         </div>
 
-        <!-- REGISTER FORM -->
         <div id="register-form" class="space-y-4 hidden">
             <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Your Email (Gmail)</label>
+                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Your Email</label>
                 <input type="email" id="reg-email" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. ali@gmail.com">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Create Password</label>
                 <div class="relative">
-                    <input type="password" id="reg-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 pr-10" placeholder="Any Password">
-                    <button onclick="togglePass('reg-pass', this)" class="absolute right-3 top-3 text-slate-400 hover:text-blue-500 focus:outline-none">
-                        <i class="fas fa-eye"></i>
-                    </button>
+                    <input type="password" id="reg-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 pr-10" placeholder="Password">
+                    <button onclick="togglePass('reg-pass', this)" class="absolute right-3 top-3 text-slate-400 hover:text-blue-500 focus:outline-none"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Recovery PIN (4 Digits)</label>
                 <input type="number" id="reg-pin" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. 1234">
-                <p class="text-[10px] text-slate-400 mt-1">Needed if you forget password.</p>
             </div>
-            
-            <button onclick="handleRegister()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md">
-                Register & Login
-            </button>
-            
-            <div class="text-center text-xs text-slate-400 mt-2">
-                Already have account? <button onclick="toggleAuth('login')" class="text-blue-500 hover:underline font-bold">Login Here</button>
-            </div>
+            <button onclick="handleRegister()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md">Register & Login</button>
+            <div class="text-center text-xs text-slate-400 mt-2">Already have account? <button onclick="toggleAuth('login')" class="text-blue-500 hover:underline font-bold">Login</button></div>
         </div>
 
-        <!-- FORGOT PASSWORD FORM -->
         <div id="forgot-form" class="space-y-4 hidden">
             <h3 class="text-sm font-bold text-center text-slate-700 mb-2">Reset Password</h3>
-            <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Email ID</label>
-                <input type="email" id="forgot-id" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="e.g. ali@gmail.com">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Recovery PIN</label>
-                <input type="number" id="forgot-pin" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter 4-digit PIN">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">New Password</label>
-                <div class="relative">
-                    <input type="password" id="forgot-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 pr-10" placeholder="New Password">
-                    <button onclick="togglePass('forgot-pass', this)" class="absolute right-3 top-3 text-slate-400 hover:text-blue-500 focus:outline-none">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <button onclick="handleResetPassword()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition duration-300 shadow-md">
-                Reset Password
-            </button>
-            
-            <div class="text-center text-xs text-slate-400 mt-2">
-                <button onclick="toggleAuth('login')" class="text-blue-500 hover:underline font-bold">Back to Login</button>
-            </div>
+            <input type="email" id="forgot-id" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="Email ID">
+            <input type="number" id="forgot-pin" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="Recovery PIN">
+            <input type="password" id="forgot-pass" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="New Password">
+            <button onclick="handleResetPassword()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg shadow-md">Reset Password</button>
+            <div class="text-center text-xs text-slate-400 mt-2"><button onclick="toggleAuth('login')" class="text-blue-500 hover:underline font-bold">Back to Login</button></div>
         </div>
     </div>
 
-    <!-- ================= MAIN APP CONTAINER ================= -->
+    <!-- MAIN APP -->
     <div id="app-container" class="hidden w-full max-w-md flex-col items-center w-full">
-        
-        <!-- Header -->
         <header class="w-full bg-blue-900 text-white p-4 rounded-xl shadow-lg mb-3 border-b-4 border-blue-800">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h1 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-cloud text-blue-200"></i>
-                        <span>Madani Budget</span>
-                    </h1>
-                    <p class="text-[10px] text-blue-300 flex items-center gap-1">
-                        <i class="fas fa-user-circle"></i> <span id="display-username">User</span>
-                    </p>
+                    <h1 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-cloud text-blue-200"></i><span>Madani Budget</span></h1>
+                    <p class="text-[10px] text-blue-300 flex items-center gap-1"><i class="fas fa-user-circle"></i> <span id="display-username">User</span></p>
                 </div>
                 <div class="text-right">
-                    <button onclick="logout()" class="text-[10px] bg-blue-800 hover:bg-blue-700 px-2 py-1 rounded mb-1 transition-colors border border-blue-700">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
+                    <button onclick="logout()" class="text-[10px] bg-blue-800 hover:bg-blue-700 px-2 py-1 rounded mb-1 transition-colors border border-blue-700"><i class="fas fa-sign-out-alt"></i> Logout</button>
                     <h2 class="text-xl font-bold tracking-tight" id="total-balance">₹0</h2>
                 </div>
             </div>
-
-            <!-- 3 Accounts -->
             <div class="grid grid-cols-3 gap-2 mb-3">
-                <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30">
-                    <p class="text-[9px] text-blue-200 uppercase tracking-wider font-semibold">Cash</p>
-                    <p class="text-sm font-bold" id="cash-balance">₹0</p>
-                </div>
-                <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30">
-                    <p class="text-[9px] text-blue-200 uppercase tracking-wider font-semibold">Bank</p>
-                    <p class="text-sm font-bold" id="bank-balance">₹0</p>
-                </div>
-                <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30">
-                    <p class="text-[9px] text-blue-200 uppercase tracking-wider font-semibold">Udhar</p>
-                    <p class="text-sm font-bold text-yellow-300" id="udhar-balance">₹0</p>
-                </div>
+                <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30"><p class="text-[9px] text-blue-200 uppercase font-semibold">Cash</p><p class="text-sm font-bold" id="cash-balance">₹0</p></div>
+                <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30"><p class="text-[9px] text-blue-200 uppercase font-semibold">Bank</p><p class="text-sm font-bold" id="bank-balance">₹0</p></div>
+                <div class="bg-blue-800/50 p-2 rounded-lg text-center border border-blue-500/30"><p class="text-[9px] text-blue-200 uppercase font-semibold">Udhar</p><p class="text-sm font-bold text-yellow-300" id="udhar-balance">₹0</p></div>
             </div>
-
-            <!-- Income & Expense Summary -->
             <div class="grid grid-cols-2 gap-2">
-                <div class="bg-blue-800/30 p-2 rounded-lg flex justify-between items-center border border-green-500/30 relative overflow-hidden">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
-                    <div class="pl-2">
-                        <p class="text-[9px] text-blue-200 uppercase">Income</p>
-                        <p class="text-sm font-bold text-green-400" id="total-income">₹0</p>
-                    </div>
-                    <i class="fas fa-arrow-down text-green-500/20 text-xl absolute right-2"></i>
-                </div>
-                <div class="bg-blue-800/30 p-2 rounded-lg flex justify-between items-center border border-red-500/30 relative overflow-hidden">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
-                    <div class="pl-2">
-                        <p class="text-[9px] text-blue-200 uppercase">Expense</p>
-                        <p class="text-sm font-bold text-red-400" id="total-expense">₹0</p>
-                    </div>
-                    <i class="fas fa-arrow-up text-red-500/20 text-xl absolute right-2"></i>
-                </div>
+                <div class="bg-blue-800/30 p-2 rounded-lg flex justify-between items-center border border-green-500/30 relative overflow-hidden"><div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div><div class="pl-2"><p class="text-[9px] text-blue-200 uppercase">Income</p><p class="text-sm font-bold text-green-400" id="total-income">₹0</p></div><i class="fas fa-arrow-down text-green-500/20 text-xl absolute right-2"></i></div>
+                <div class="bg-blue-800/30 p-2 rounded-lg flex justify-between items-center border border-red-500/30 relative overflow-hidden"><div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div><div class="pl-2"><p class="text-[9px] text-blue-200 uppercase">Expense</p><p class="text-sm font-bold text-red-400" id="total-expense">₹0</p></div><i class="fas fa-arrow-up text-red-500/20 text-xl absolute right-2"></i></div>
             </div>
         </header>
 
-        <!-- Budget Progress -->
         <div id="budget-display" class="w-full bg-white p-3 rounded-xl card-shadow mb-3 hidden">
-            <h3 class="text-slate-700 font-bold mb-2 text-xs border-b border-slate-100 pb-2 uppercase tracking-wide flex justify-between items-center">
-                <span>Budget Goals</span>
-            </h3>
+            <h3 class="text-slate-700 font-bold mb-2 text-xs border-b border-slate-100 pb-2 uppercase tracking-wide flex justify-between items-center"><span>Budget Goals</span></h3>
             <div id="budget-bars-container" class="space-y-3 max-h-32 overflow-y-auto scroller pr-1"></div>
         </div>
 
-        <!-- New Entry Form -->
         <div class="w-full bg-white p-4 rounded-xl card-shadow mb-3" id="entry-form-card">
             <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2">
-                <h3 class="text-slate-800 font-bold text-sm flex items-center gap-2">
-                    New Entry
-                </h3>
+                <h3 class="text-slate-800 font-bold text-sm flex items-center gap-2">New Entry</h3>
                 <div class="flex gap-2">
-                    <button onclick="toggleBudgetModal()" class="text-[10px] bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 font-bold transition-colors flex items-center">
-                        <i class="fas fa-sliders-h mr-1.5"></i>Set Limits
-                    </button>
+                    <button onclick="toggleBudgetModal()" class="text-[10px] bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 font-bold transition-colors flex items-center"><i class="fas fa-sliders-h mr-1.5"></i>Set Limits</button>
                     <button onclick="resetForm()" id="cancel-edit-btn" class="hidden text-[10px] text-red-500 hover:text-red-700 font-bold uppercase">Cancel</button>
                 </div>
             </div>
-            
             <div class="space-y-3">
-                <!-- Row 1: Date & Type -->
                 <div class="flex gap-2">
-                    <div class="w-1/3">
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Date</label>
-                        <input type="date" id="entry-date" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700">
-                    </div>
-                    <div class="w-2/3">
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Type</label>
-                        <select id="type" onchange="toggleFormState()" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-bold transition-colors duration-300 focus:ring-1 white-arrow">
-                            <option value="income" class="text-black bg-white">Income (+)</option>
-                            <option value="expense" class="text-black bg-white">Expense (-)</option>
-                            <option value="transfer" class="text-black bg-white">Transfer (⇄)</option>
-                        </select>
-                    </div>
+                    <div class="w-1/3"><label class="block text-[10px] font-bold text-slate-500 mb-1">Date</label><input type="date" id="entry-date" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:border-blue-500"></div>
+                    <div class="w-2/3"><label class="block text-[10px] font-bold text-slate-500 mb-1">Type</label><select id="type" onchange="toggleFormState()" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-bold transition-colors duration-300 focus:ring-1 white-arrow"><option value="income" class="text-black bg-white">Income (+)</option><option value="expense" class="text-black bg-white">Expense (-)</option><option value="transfer" class="text-black bg-white">Transfer (⇄)</option></select></div>
                 </div>
-
-                <!-- Row 2: Account Selection -->
                 <div class="flex gap-2">
-                    <div class="w-1/2" id="from-account-wrapper">
-                        <label id="account-label" class="block text-[10px] font-bold text-slate-500 mb-1">Account</label>
-                        <select id="account-select" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500">
-                            <option value="Cash">Cash</option>
-                            <option value="My Account">Bank Account</option>
-                            <option value="Udhar">Udhar</option>
-                        </select>
-                    </div>
-                    <div class="w-1/2 hidden" id="to-account-container">
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">To Account</label>
-                        <select id="to-account-select" class="w-full p-2 bg-green-50 border border-green-200 rounded-lg text-xs font-semibold text-green-900 focus:outline-none focus:border-green-500">
-                            <option value="My Account">Bank Account</option>
-                            <option value="Cash">Cash</option>
-                            <option value="Udhar">Udhar</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Category Dropdown -->
+                    <div class="w-1/2" id="from-account-wrapper"><label id="account-label" class="block text-[10px] font-bold text-slate-500 mb-1">Account</label><select id="account-select" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500"><option value="Cash">Cash</option><option value="My Account">Bank Account</option><option value="Udhar">Udhar</option></select></div>
+                    <div class="w-1/2 hidden" id="to-account-container"><label class="block text-[10px] font-bold text-slate-500 mb-1">To Account</label><select id="to-account-select" class="w-full p-2 bg-green-50 border border-green-200 rounded-lg text-xs font-semibold text-green-900 focus:outline-none focus:border-green-500"><option value="My Account">Bank Account</option><option value="Cash">Cash</option><option value="Udhar">Udhar</option></select></div>
                     <div class="w-1/2" id="category-wrapper">
                         <label class="block text-[10px] font-bold text-slate-500 mb-1">Category</label>
-                        <select id="desc-select" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 font-medium text-slate-700">
-                            <!-- Populated by JS based on type -->
-                        </select>
+                        <select id="desc-select" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 font-medium text-slate-700"></select>
                         <input type="text" id="desc-text" placeholder="Source..." class="hidden w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 text-slate-700">
                     </div>
                 </div>
-
-                <!-- Row 3: Amount & Note -->
                 <div class="flex gap-2">
-                    <div class="w-1/3">
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Amount</label>
-                        <input type="number" id="amount" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                    </div>
-                    <div class="w-2/3">
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Note / Details</label>
-                        <input type="text" id="entry-note" placeholder="Optional details..." class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 text-slate-600">
-                    </div>
+                    <div class="w-1/3"><label class="block text-[10px] font-bold text-slate-500 mb-1">Amount</label><input type="number" id="amount" placeholder="0" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500"></div>
+                    <div class="w-2/3"><label class="block text-[10px] font-bold text-slate-500 mb-1">Note / Details</label><input type="text" id="entry-note" placeholder="Optional details..." class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-blue-500 text-slate-600"></div>
                 </div>
-
-                <button id="save-btn" onclick="addTransaction()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg transition duration-300 shadow-sm mt-1 text-xs uppercase tracking-wide flex justify-center items-center gap-2">
-                    <i class="fas fa-plus"></i> <span>Save Entry</span>
-                </button>
+                <button id="save-btn" onclick="addTransaction()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg transition duration-300 shadow-sm mt-1 text-xs uppercase tracking-wide flex justify-center items-center gap-2"><i class="fas fa-plus"></i> <span>Save Entry</span></button>
             </div>
         </div>
 
-        <!-- Chart -->
         <div class="w-full bg-white p-3 rounded-xl card-shadow mb-3">
             <h3 class="text-slate-700 font-bold mb-2 text-[10px] uppercase tracking-wide text-center">Analysis</h3>
-            <div class="relative h-24 w-full flex justify-center">
-                <canvas id="expenseChart"></canvas>
-            </div>
+            <div class="relative h-24 w-full flex justify-center"><canvas id="expenseChart"></canvas></div>
             <p id="no-data-msg" class="text-center text-slate-300 text-[10px] mt-2 hidden">No data available</p>
         </div>
 
-        <!-- History -->
         <div class="w-full">
             <div class="flex justify-between items-end mb-2">
                 <h3 class="text-slate-700 font-bold text-xs">Recent History</h3>
                 <div class="flex items-center gap-2">
-                    <button onclick="downloadPDF()" class="text-[9px] flex items-center gap-1 text-blue-700 hover:text-blue-900 font-bold bg-blue-50 px-2 py-1 rounded border border-blue-200 transition-colors">
-                        <i class="fas fa-file-pdf"></i> Download PDF
-                    </button>
+                    <button onclick="downloadPDF()" class="text-[9px] flex items-center gap-1 text-blue-700 hover:text-blue-900 font-bold bg-blue-50 px-2 py-1 rounded border border-blue-200 transition-colors"><i class="fas fa-file-pdf"></i> Download PDF</button>
                     <button onclick="deleteTransaction(null, true)" class="text-[9px] text-red-400 hover:text-red-600 font-semibold">Clear All</button>
                 </div>
             </div>
             <ul id="list" class="space-y-2 pb-10"></ul>
-        </div>
-
-        <!-- DATA BACKUP SECTION -->
-        <div class="w-full mt-4 mb-10 text-center border-t pt-4 border-slate-200">
-            <p class="text-[10px] text-slate-400 mb-2 uppercase tracking-widest font-bold">Data Safety</p>
-            <div class="flex gap-2 justify-center">
-                <button onclick="exportData()" class="text-xs bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 px-4 py-2 rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all">
-                    <i class="fas fa-cloud-download-alt text-blue-600"></i> Backup Save Karein
-                </button>
-                <button onclick="document.getElementById('import-file').click()" class="text-xs bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 px-4 py-2 rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all">
-                    <i class="fas fa-cloud-upload-alt text-green-600"></i> Restore Data
-                </button>
-                <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(this)">
-            </div>
-            <p class="text-[9px] text-slate-400 mt-2 italic">Save backup file to Google Drive/Email for long term safety.</p>
         </div>
     </div>
 
     <!-- BUDGET MODAL -->
     <div id="budget-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-xs flex flex-col animate-fade-in-up">
-            <div class="p-4 border-b flex justify-between items-center bg-slate-50 rounded-t-xl">
-                <h3 class="text-sm font-bold text-slate-800">Set Budget Limit</h3>
-                <button onclick="toggleBudgetModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="p-4 border-b flex justify-between items-center bg-slate-50 rounded-t-xl"><h3 class="text-sm font-bold text-slate-800">Set Budget Limit</h3><button onclick="toggleBudgetModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button></div>
             <div class="p-5 space-y-4">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Select Category</label>
-                    <select id="modal-cat-select" onchange="loadBudgetForCategory()" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"></select>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Monthly Limit</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-2.5 text-slate-400 text-xs font-bold">₹</span>
-                        <input type="number" id="modal-limit-input" placeholder="0" class="w-full pl-7 p-2.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:border-blue-500 outline-none focus:ring-1 focus:ring-blue-500">
-                    </div>
-                </div>
+                <div><label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Select Category</label><select id="modal-cat-select" onchange="loadBudgetForCategory()" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"></select></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Monthly Limit</label><div class="relative"><span class="absolute left-3 top-2.5 text-slate-400 text-xs font-bold">₹</span><input type="number" id="modal-limit-input" placeholder="0" class="w-full pl-7 p-2.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:border-blue-500 outline-none focus:ring-1 focus:ring-blue-500"></div></div>
             </div>
-            <div class="p-4 border-t bg-slate-50 rounded-b-xl">
-                <button onclick="saveSingleBudget()" class="w-full py-2.5 bg-blue-700 text-white text-xs font-bold rounded-lg hover:bg-blue-800 shadow-md transition-all">
-                    Save Limit
-                </button>
-            </div>
+            <div class="p-4 border-t bg-slate-50 rounded-b-xl"><button onclick="saveSingleBudget()" class="w-full py-2.5 bg-blue-700 text-white text-xs font-bold rounded-lg hover:bg-blue-800 shadow-md transition-all">Save Limit</button></div>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Init
+        // CONFIG & STATE
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // State
         let currentUser = null;
         let transactions = [];
         let budgetSettings = { income: 0, budgets: {} };
         let chartInstance = null;
         let editingId = null;
 
-        const expenseCategories = [
-            { name: "Rent", type: "needs" }, { name: "Groceries", type: "needs" },
-            { name: "Bills", type: "needs" }, { name: "Education", type: "needs" },
-            { name: "Medical", type: "needs" }, { name: "Transport", type: "needs" },
-            { name: "Mobile/Data", type: "needs" }, { name: "Food/Dining", type: "wants" },
-            { name: "Shopping", type: "wants" }, { name: "Gifts", type: "wants" },
-            { name: "Savings", type: "savings" }, { name: "Other", type: "wants" }
-        ];
-        const incomeCategories = [
-            { name: "Salary", type: "income" }, { name: "Business", type: "income" },
-            { name: "Bonus", type: "income" }, { name: "Gift", type: "income" },
-            { name: "Loan", type: "income" }, { name: "Other", type: "income" }
-        ];
+        const expenseCategories = [{name:"Rent",type:"needs"},{name:"Groceries",type:"needs"},{name:"Bills",type:"needs"},{name:"Education",type:"needs"},{name:"Medical",type:"needs"},{name:"Transport",type:"needs"},{name:"Mobile/Data",type:"needs"},{name:"Food/Dining",type:"wants"},{name:"Shopping",type:"wants"},{name:"Gifts",type:"wants"},{name:"Savings",type:"savings"},{name:"Other",type:"wants"}];
+        const incomeCategories = [{name:"Salary",type:"income"},{name:"Business",type:"income"},{name:"Bonus",type:"income"},{name:"Gift",type:"income"},{name:"Loan",type:"income"},{name:"Other",type:"income"}];
 
-        // Auth on Load
+        // INIT
         (async function init() {
             try {
+                // Ensure auth is ready before anything else
                 await signInAnonymously(auth);
                 document.getElementById('loading-overlay').classList.add('hidden');
                 setupDateInput();
+                // Initialize form state to ensure dropdowns are populated
+                window.toggleFormState();
             } catch (error) {
                 console.error("Auth Failed", error);
                 alert("Connection Error. Please refresh.");
             }
         })();
 
-        // --- EXPORT FUNCTIONS FOR HTML HANDLERS ---
+        // --- AUTH FUNCTIONS ---
         window.toggleAuth = (mode) => {
-            const login = document.getElementById('login-form');
-            const reg = document.getElementById('register-form');
-            const forgot = document.getElementById('forgot-form');
-            
-            login.classList.add('hidden');
-            reg.classList.add('hidden');
-            forgot.classList.add('hidden');
-
-            if(mode === 'register') reg.classList.remove('hidden');
-            else if(mode === 'forgot') forgot.classList.remove('hidden');
-            else login.classList.remove('hidden');
+            ['login-form','register-form','forgot-form'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            if(mode==='register') document.getElementById('register-form').classList.remove('hidden');
+            else if(mode==='forgot') document.getElementById('forgot-form').classList.remove('hidden');
+            else document.getElementById('login-form').classList.remove('hidden');
         };
 
         window.togglePass = (id, btn) => {
             const input = document.getElementById(id);
             const icon = btn.querySelector('i');
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = "password";
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+            input.type = input.type === "password" ? "text" : "password";
+            icon.classList.toggle('fa-eye'); icon.classList.toggle('fa-eye-slash');
         };
 
         window.handleLogin = async () => {
-            const user = document.getElementById('login-id').value.trim();
+            const user = document.getElementById('login-id').value.trim().toLowerCase();
             const pass = document.getElementById('login-pass').value.trim();
-            if(!user || !pass) return alert("Enter User ID and Password");
+            if(!user || !pass) return alert("Enter Email and Password");
+            if(!auth.currentUser) await signInAnonymously(auth);
 
             showLoading(true);
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user);
+                const safeId = user.replace(/\./g, '_dot_'); // Sanitize email for ID
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', safeId);
                 const docSnap = await getDoc(docRef);
                 
                 if(docSnap.exists()) {
@@ -461,82 +247,84 @@
                         transactions = data.transactions || [];
                         budgetSettings = data.budgetSettings || {income: 0, budgets: {}};
                         showApp();
-                    } else {
-                        alert("Incorrect Password");
-                    }
-                } else {
-                    alert("User ID not found. Please Register.");
-                }
+                    } else { alert("Incorrect Password"); }
+                } else { alert("Email not found. Register first."); }
             } catch(e) { console.error(e); alert("Login Error: " + e.message); }
             showLoading(false);
         };
 
         window.handleRegister = async () => {
-            const email = document.getElementById('reg-email').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
             const pass = document.getElementById('reg-pass').value.trim();
             const pin = document.getElementById('reg-pin').value.trim();
             
             if(!email || !pass || !pin) return alert("Fill all fields");
-            if(pin.length !== 4) return alert("PIN must be 4 digits");
-
-            // Simple validation to ensure it looks like an email
             if(!email.includes('@')) return alert("Enter valid email");
-
-            // Use email as ID (replace special chars for firestore doc ID safety if needed, but email is mostly safe)
-            const userId = email; 
+            if(pin.length !== 4) return alert("PIN must be 4 digits");
+            if(!auth.currentUser) await signInAnonymously(auth);
 
             showLoading(true);
-            
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userId);
+                const safeId = email.replace(/\./g, '_dot_');
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', safeId);
                 const docSnap = await getDoc(docRef);
                 
                 if(docSnap.exists()) {
-                    alert(`Email ${userId} already exists! Try logging in.`);
+                    alert(`Email already exists! Try logging in.`);
                 } else {
-                    await setDoc(docRef, {
-                        password: pass,
-                        pin: pin,
-                        transactions: [],
-                        budgetSettings: {income: 0, budgets: {}}
-                    });
-                    alert(`Registered Successfully! Please Login.`);
+                    await setDoc(docRef, { password: pass, pin: pin, transactions: [], budgetSettings: {income: 0, budgets: {}} });
+                    alert(`Registered! Login with ${email}`);
                     window.toggleAuth('login');
-                    document.getElementById('login-id').value = userId;
+                    document.getElementById('login-id').value = email;
                 }
-            } catch(e) { console.error(e); alert("Registration Error"); }
+            } catch(e) { console.error(e); alert("Registration Error: " + e.message); }
             showLoading(false);
         };
 
         window.handleResetPassword = async () => {
-            const userId = document.getElementById('forgot-id').value.trim();
+            const email = document.getElementById('forgot-id').value.trim().toLowerCase();
             const pin = document.getElementById('forgot-pin').value.trim();
             const newPass = document.getElementById('forgot-pass').value.trim();
-
-            if(!userId || !pin || !newPass) return alert("Fill all fields");
+            if(!email || !pin || !newPass) return alert("Fill all fields");
+            if(!auth.currentUser) await signInAnonymously(auth);
 
             showLoading(true);
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userId);
+                const safeId = email.replace(/\./g, '_dot_');
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', safeId);
                 const docSnap = await getDoc(docRef);
                 
-                if(docSnap.exists()) {
-                    const data = docSnap.data();
-                    if(data.pin === pin) {
-                        await updateDoc(docRef, { password: newPass });
-                        alert("Password Reset Successful! Login now.");
-                        window.toggleAuth('login');
-                    } else {
-                        alert("Incorrect PIN.");
-                    }
-                } else {
-                    alert("User ID not found.");
-                }
+                if(docSnap.exists() && docSnap.data().pin === pin) {
+                    await updateDoc(docRef, { password: newPass });
+                    alert("Password Reset! Login now.");
+                    window.toggleAuth('login');
+                } else { alert("Incorrect PIN or Email not found."); }
             } catch(e) { console.error(e); alert("Reset Error"); }
             showLoading(false);
         };
 
         window.logout = () => location.reload();
+
+        // --- APP FUNCTIONS ---
+        function showApp() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('flex');
+            document.body.classList.remove('justify-center');
+            document.getElementById('display-username').innerText = currentUser.split('@')[0];
+            // Ensure dropdown is populated correctly on load
+            window.toggleFormState();
+            updateUI();
+        }
+
+        async function saveData() {
+            if(!currentUser) return;
+            try {
+                const safeId = currentUser.replace(/\./g, '_dot_');
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', safeId);
+                await updateDoc(docRef, { transactions: transactions, budgetSettings: budgetSettings });
+            } catch(e) { console.error(e); }
+        }
 
         window.addTransaction = async () => {
             if(!currentUser) return;
@@ -549,15 +337,13 @@
             
             let category = type !== 'transfer' ? document.getElementById('desc-select').value : 'Transfer';
             
-            if((type !== 'transfer' && !category) || amount <= 0 || !dateVal) return alert("Invalid Input");
+            if((type !== 'transfer' && !category) || amount <= 0 || !dateVal) return alert("Invalid details");
             if(type === 'transfer' && account === toAccount) return alert("Same Accounts");
 
             if(type === 'expense' && budgetSettings.budgets[category]) {
                 const limit = budgetSettings.budgets[category];
                 const spent = transactions.filter(t => t.type === 'expense' && t.desc === category && t.id !== editingId).reduce((a,b)=>a+b.amount,0);
-                if((spent + amount) > limit) {
-                    if(!confirm(`Over Budget! Limit: ${limit}. Proceed?`)) return;
-                }
+                if((spent + amount) > limit) if(!confirm(`Over Limit! Limit: ${limit}. Proceed?`)) return;
             }
 
             const newTx = {
@@ -572,9 +358,7 @@
                 if(idx > -1) transactions[idx] = newTx;
                 editingId = null;
                 resetFormUI();
-            } else {
-                transactions.push(newTx);
-            }
+            } else { transactions.push(newTx); }
 
             await saveData();
             updateUI();
@@ -587,10 +371,10 @@
             const t = transactions.find(x => x.id === id);
             if(!t) return;
             editingId = id;
-            
             document.getElementById('type').value = t.type;
             window.toggleFormState();
             
+            // Allow DOM update
             setTimeout(() => {
                 if(t.type !== 'transfer') document.getElementById('desc-select').value = t.desc;
                 else document.getElementById('desc-text').value = t.desc;
@@ -611,68 +395,20 @@
 
         window.deleteTransaction = async (id, clearAll = false) => {
             if(!currentUser) return;
-            if(clearAll) {
-                if(confirm("Delete ALL data?")) {
-                    transactions = [];
-                    budgetSettings = {income: 0, budgets: {}};
-                    await saveData();
-                    updateUI();
-                }
-                return;
-            }
-            if(confirm("Delete entry?")) {
-                transactions = transactions.filter(t => t.id !== id);
-                if(editingId === id) window.resetForm();
-                await saveData();
-                updateUI();
-            }
-        };
-
-        window.resetForm = () => {
-            editingId = null;
-            resetFormUI();
-            document.getElementById('amount').value = '';
-            document.getElementById('entry-note').value = '';
-        };
-
-        window.toggleBudgetModal = () => {
-            const modal = document.getElementById('budget-modal');
-            modal.classList.toggle('hidden');
-            if(!modal.classList.contains('hidden')) {
-                const sel = document.getElementById('modal-cat-select');
-                if(sel.options.length === 0) {
-                    expenseCategories.forEach(c => {
-                        const o = document.createElement('option');
-                        o.value = c.name; o.text = c.name; sel.add(o);
-                    });
-                }
-                window.loadBudgetForCategory();
-            }
-        };
-
-        window.loadBudgetForCategory = () => {
-            const cat = document.getElementById('modal-cat-select').value;
-            document.getElementById('modal-limit-input').value = budgetSettings.budgets[cat] || '';
-        };
-
-        window.saveSingleBudget = async () => {
-            const cat = document.getElementById('modal-cat-select').value;
-            const limit = +document.getElementById('modal-limit-input').value;
-            if(!cat) return;
-            if(limit > 0) budgetSettings.budgets[cat] = limit;
-            else delete budgetSettings.budgets[cat];
-            
+            if(clearAll && confirm("Delete ALL?")) { transactions = []; budgetSettings = {income:0, budgets:{}}; }
+            else if(id && confirm("Delete?")) { transactions = transactions.filter(t => t.id !== id); if(editingId===id) window.resetForm(); }
+            else return;
             await saveData();
-            window.toggleBudgetModal();
             updateUI();
         };
+
+        window.resetForm = () => { editingId = null; resetFormUI(); document.getElementById('amount').value = ''; document.getElementById('entry-note').value = ''; };
+        function resetFormUI() { const btn = document.getElementById('save-btn'); btn.innerHTML = '<span>Save Entry</span>'; btn.classList.replace('bg-green-600', 'bg-blue-700'); document.getElementById('cancel-edit-btn').classList.add('hidden'); }
 
         window.toggleFormState = () => {
             const type = document.getElementById('type').value;
             const typeInput = document.getElementById('type');
-            
             typeInput.className = "w-full p-2 border border-slate-300 rounded-lg text-xs font-bold transition-colors duration-300 focus:ring-1 white-arrow";
-
             const catWrap = document.getElementById('category-wrapper');
             const toAcc = document.getElementById('to-account-container');
             const descSel = document.getElementById('desc-select');
@@ -680,129 +416,112 @@
 
             if(type === 'transfer') {
                 typeInput.classList.add('bg-blue-600', 'border-blue-600', 'text-white');
-                toAcc.classList.remove('hidden');
-                catWrap.classList.add('hidden');
-                descSel.classList.add('hidden');
-                descTxt.classList.remove('hidden');
+                toAcc.classList.remove('hidden'); catWrap.classList.add('hidden'); descSel.classList.add('hidden'); descTxt.classList.remove('hidden');
             } else {
-                toAcc.classList.add('hidden');
-                catWrap.classList.remove('hidden');
-                descSel.classList.remove('hidden');
-                descTxt.classList.add('hidden');
-                
-                if(type === 'expense') {
-                    typeInput.classList.add('bg-red-600', 'border-red-600', 'text-white');
-                    populateCats(expenseCategories);
-                } else {
-                    typeInput.classList.add('bg-green-600', 'border-green-600', 'text-white');
-                    populateCats(incomeCategories);
-                }
+                toAcc.classList.add('hidden'); catWrap.classList.remove('hidden'); descSel.classList.remove('hidden'); descTxt.classList.add('hidden');
+                if(type === 'expense') { typeInput.classList.add('bg-red-600', 'border-red-600', 'text-white'); populateCats(expenseCategories); } 
+                else { typeInput.classList.add('bg-green-600', 'border-green-600', 'text-white'); populateCats(incomeCategories); }
             }
         };
-
-        window.downloadPDF = () => {
-            if(transactions.length === 0) return alert("No data to export");
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // COLORS (Very Light Theme)
-            const bgLight = [240, 249, 255];    
-            const textDark = [30, 58, 138];     
-            const textGray = [100, 116, 139];   
-            const accentBlue = [186, 230, 253]; 
-
-            doc.setFillColor(...bgLight); doc.rect(0, 0, 210, 50, 'F'); 
-            doc.setTextColor(...textDark); doc.setFontSize(24); doc.setFont('helvetica', 'bold');
-            doc.text("Madani Budget Planner", 105, 25, { align: 'center' });
-            doc.setTextColor(...textGray); doc.setFontSize(11); doc.setFont('helvetica', 'normal');
-            doc.text(`Financial Report | ${new Date().toLocaleDateString('en-GB')}`, 105, 35, { align: 'center' });
-
-            const inc = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
-            const exp = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
-            
-            doc.autoTable({
-                startY: 60,
-                head: [['Opening Balance', 'Total Activity', 'Closing Balance (Net)']],
-                body: [["0.00", `${inc - exp}`, `${(inc - exp).toFixed(2)}`]],
-                theme: 'grid',
-                headStyles: { fillColor: [255,255,255], textColor: textGray, fontStyle: 'bold', halign: 'left', lineWidth: 0 },
-                bodyStyles: { textColor: textDark, fontStyle: 'bold', fontSize: 12 },
-                columnStyles: { 1: { textColor: [22, 163, 74] }, 2: { textColor: textDark } },
-                styles: { lineColor: [226, 232, 240], lineWidth: 0.1, cellPadding: 6 },
-                margin: { left: 14, right: 14 }
-            });
-
-            doc.setFontSize(14); doc.setTextColor(...textDark); doc.setFont('helvetica', 'bold');
-            doc.text("Transaction Details", 14, doc.lastAutoTable.finalY + 15);
-            doc.setDrawColor(...accentBlue); doc.setLineWidth(0.5);
-            doc.line(14, doc.lastAutoTable.finalY + 17, 60, doc.lastAutoTable.finalY + 17);
-
-            const rows = transactions.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(t => [
-                t.date, t.time||'-', `${t.desc} ${t.note?' - '+t.note:''}`, t.account, t.type==='income'?`+${t.amount}`:'', t.type==='expense'?`-${t.amount}`:''
-            ]);
-
-            doc.autoTable({
-                startY: doc.lastAutoTable.finalY + 25,
-                head: [['Date', 'Time', 'Description', 'Account', 'Credit', 'Debit']],
-                body: rows,
-                theme: 'plain',
-                headStyles: { fillColor: bgLight, textColor: textDark, fontStyle: 'bold', lineWidth: 0 },
-                bodyStyles: { textColor: [71, 85, 105], fontSize: 9, cellPadding: 4 },
-                columnStyles: { 4: { textColor: [22, 163, 74], halign: 'right', fontStyle: 'bold' }, 5: { textColor: [220, 38, 38], halign: 'right', fontStyle: 'bold' } },
-                alternateRowStyles: { fillColor: [252, 252, 253] },
-                margin: { left: 14, right: 14 },
-                didDrawCell: function (data) {
-                    if (data.section === 'head' || data.section === 'body') {
-                        doc.setDrawColor(240, 240, 240); doc.setLineWidth(0.1);
-                        doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
-                    }
-                }
-            });
-
-            const pageCount = doc.internal.getNumberOfPages();
-            for(let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setDrawColor(...accentBlue); doc.setLineWidth(0.3); doc.rect(5, 5, 200, 287); 
-                doc.setFontSize(8); doc.setTextColor(180);
-                doc.text(`Page ${i} of ${pageCount}`, 196, 290, { align: 'right' });
-                doc.text("Madani Budget Planner", 14, 290);
-            }
-            doc.save('Madani_Budget_Report.pdf');
-        };
-
-        // --- BACKUP & RESTORE ---
-        window.exportData = exportData;
-        window.importData = importData;
 
         function populateCats(cats) {
             const sel = document.getElementById('desc-select');
             sel.innerHTML = '<option value="" disabled selected>Category...</option>';
-            cats.forEach(c => {
-                const o = document.createElement('option');
-                o.value = c.name; o.text = c.name; sel.add(o);
+            cats.forEach(c => { const o = document.createElement('option'); o.value = c.name; o.text = c.name; sel.add(o); });
+        }
+
+        // Budget Modal
+        window.toggleBudgetModal = () => {
+            const modal = document.getElementById('budget-modal');
+            modal.classList.toggle('hidden');
+            if(!modal.classList.contains('hidden')) {
+                const sel = document.getElementById('modal-cat-select');
+                if(sel.options.length === 0) { expenseCategories.forEach(c => { const o = document.createElement('option'); o.value = c.name; o.text = c.name; sel.add(o); }); }
+                window.loadBudgetForCategory();
+            }
+        };
+        window.loadBudgetForCategory = () => { const cat = document.getElementById('modal-cat-select').value; document.getElementById('modal-limit-input').value = budgetSettings.budgets[cat] || ''; };
+        window.saveSingleBudget = async () => {
+            const cat = document.getElementById('modal-cat-select').value; const limit = +document.getElementById('modal-limit-input').value;
+            if(!cat) return;
+            if(limit > 0) budgetSettings.budgets[cat] = limit; else delete budgetSettings.budgets[cat];
+            await saveData(); window.toggleBudgetModal(); updateUI();
+        };
+
+        // UI & PDF
+        function updateUI() {
+            const inc = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
+            const exp = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
+            const bal = (acc) => transactions.reduce((sum, t) => {
+                if(t.type==='transfer') { return (t.account===acc ? sum-t.amount : (t.toAccount===acc ? sum+t.amount : sum)); }
+                return (t.account===acc ? (t.type==='income'?sum+t.amount:sum-t.amount) : sum);
+            }, 0);
+
+            document.getElementById('total-income').innerText = `₹${inc}`;
+            document.getElementById('total-expense').innerText = `₹${exp}`;
+            document.getElementById('total-balance').innerText = `₹${inc-exp}`;
+            document.getElementById('cash-balance').innerText = `₹${bal('Cash')}`;
+            document.getElementById('bank-balance').innerText = `₹${bal('My Account')}`;
+            document.getElementById('udhar-balance').innerText = `₹${bal('Udhar')}`;
+
+            renderHistory(); renderChart(); renderBudget();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('list'); list.innerHTML = '';
+            const sorted = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+            sorted.forEach(t => {
+                let color = t.type==='income'?'text-green-600':(t.type==='expense'?'text-red-600':'text-blue-600');
+                let sign = t.type==='income'?'+':(t.type==='expense'?'-':'⇄');
+                const d = new Date(t.date);
+                list.innerHTML += `<li class="bg-white p-2.5 rounded-xl shadow-sm flex justify-between items-center border-l-4 ${t.type==='income'?'border-green-500':(t.type==='expense'?'border-red-500':'border-blue-500')}"><div class="flex items-center gap-3"><div class="bg-slate-100 p-2 rounded-lg text-center min-w-[3rem]"><div class="text-[9px] font-bold text-slate-500 uppercase">${d.toLocaleString('default', {month:'short'})}</div><div class="text-sm font-bold text-slate-800">${d.getDate()}</div></div><div class="overflow-hidden"><div class="text-xs font-bold text-slate-800 truncate">${t.desc}</div><div class="text-[10px] text-slate-500">${t.account} ${t.type==='transfer'?'→ '+t.toAccount:''} ${t.note?'- '+t.note:''}</div></div></div><div class="text-right pl-2"><div class="text-sm font-bold ${color}">${sign}₹${t.amount}</div><div class="flex gap-3 justify-end mt-1"><button onclick="editTransaction(${t.id})" class="text-slate-400 hover:text-blue-500 text-[11px]"><i class="fas fa-pen"></i></button><button onclick="deleteTransaction(${t.id})" class="text-slate-400 hover:text-red-500 text-[11px]"><i class="fas fa-trash"></i></button></div></div></li>`;
             });
         }
 
-        function showLoading(show) {
-            const el = document.getElementById('loading-overlay');
-            if(show) el.classList.remove('hidden'); else el.classList.add('hidden');
+        function renderBudget() {
+            const container = document.getElementById('budget-bars-container'); const box = document.getElementById('budget-display');
+            const keys = Object.keys(budgetSettings.budgets);
+            if(keys.length === 0) { box.classList.add('hidden'); return; }
+            box.classList.remove('hidden'); container.innerHTML = '';
+            keys.forEach(cat => {
+                const limit = budgetSettings.budgets[cat];
+                const spent = transactions.filter(t => t.type === 'expense' && t.desc === cat).reduce((a,b)=>a+b.amount,0);
+                const pct = Math.min((spent/limit)*100, 100);
+                const color = spent > limit ? 'bg-red-500' : 'bg-blue-600';
+                container.innerHTML += `<div class="mb-2 last:mb-0"><div class="flex justify-between text-[10px] mb-1"><span class="font-bold text-slate-700">${cat}</span><span class="${spent>limit?'text-red-500':''} font-bold">₹${spent} / ₹${limit}</span></div><div class="w-full bg-slate-100 rounded-full h-2"><div class="${color} h-2 rounded-full" style="width:${pct}%"></div></div></div>`;
+            });
         }
 
-        function resetFormUI() {
-            const btn = document.getElementById('save-btn');
-            btn.innerHTML = '<span>Save Entry</span>';
-            btn.classList.replace('bg-green-600', 'bg-blue-700');
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        function renderChart() {
+            const exps = transactions.filter(t => t.type === 'expense');
+            if (exps.length === 0) { if(chartInstance) { chartInstance.destroy(); chartInstance = null; } document.getElementById('no-data-msg').classList.remove('hidden'); return; }
+            document.getElementById('no-data-msg').classList.add('hidden');
+            const data = {}; exps.forEach(t => data[t.desc] = (data[t.desc] || 0) + t.amount);
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(data), datasets: [{ data: Object.values(data), backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 8, font: {size: 10} } } } } });
         }
-        
-        function setupDateInput() {
-            const today = new Date();
-            const min = new Date(today); min.setDate(today.getDate() - 7);
-            const max = new Date(today); max.setDate(today.getDate() + 7);
-            const fmt = d => d.toISOString().split('T')[0];
-            const el = document.getElementById('entry-date');
-            if(el) { el.min = fmt(min); el.max = fmt(max); el.value = fmt(today); }
-        }
+
+        window.downloadPDF = () => {
+            if(transactions.length === 0) return alert("No data");
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.setFillColor(240, 249, 255); doc.rect(0, 0, 210, 50, 'F');
+            doc.setTextColor(30, 58, 138); doc.setFontSize(24); doc.setFont('helvetica', 'bold'); doc.text("Madani Budget Planner", 105, 25, { align: 'center' });
+            doc.setTextColor(100, 116, 139); doc.setFontSize(11); doc.setFont('helvetica', 'normal'); doc.text(`Financial Report | ${new Date().toLocaleDateString('en-GB')}`, 105, 35, { align: 'center' });
+            
+            const inc = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
+            const exp = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
+            doc.autoTable({ startY: 60, head: [['Opening', 'Activity', 'Closing']], body: [["0.00", `${inc-exp}`, `${(inc-exp).toFixed(2)}`]], theme: 'grid', headStyles: { fillColor: [255,255,255], textColor: [100,116,139] }, styles: { lineColor: [226, 232, 240] } });
+            
+            const rows = transactions.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(t => [t.date, t.time, `${t.desc} ${t.note?'- '+t.note:''}`, t.account, t.type==='income'?`+${t.amount}`:'', t.type==='expense'?`-${t.amount}`:'']);
+            doc.autoTable({ startY: doc.lastAutoTable.finalY + 25, head: [['Date', 'Time', 'Desc', 'Acc', 'Cr', 'Dr']], body: rows, theme: 'plain', headStyles: { fillColor: [240, 249, 255], textColor: [30, 58, 138] }, columnStyles: { 4: { textColor: [22, 163, 74] }, 5: { textColor: [220, 38, 38] } }, didDrawCell: (d) => { if(d.section!=='foot') { doc.setDrawColor(240,240,240); doc.line(d.cell.x, d.cell.y+d.cell.height, d.cell.x+d.cell.width, d.cell.y+d.cell.height); } } });
+            
+            for(let i=1; i<=doc.internal.getNumberOfPages(); i++) { doc.setPage(i); doc.setDrawColor(186, 230, 253); doc.rect(5, 5, 200, 287); doc.setFontSize(8); doc.text(`Page ${i}`, 196, 290, {align:'right'}); }
+            doc.save('Madani_Budget_Report.pdf');
+        };
+
+        function showLoading(show) { document.getElementById('loading-overlay').classList.toggle('hidden', !show); }
+        function setupDateInput() { const d = new Date(); const el = document.getElementById('entry-date'); if(el) el.value = d.toISOString().split('T')[0]; }
     </script>
 </body>
 </html>
