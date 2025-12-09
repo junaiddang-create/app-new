@@ -27,12 +27,12 @@
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-3 text-slate-800">
 
-    <div id="loading-overlay" class="fixed inset-0 bg-white/80 z-[60] hidden flex items-center justify-center">
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 z-[60] flex items-center justify-center">
         <div class="loader"></div>
     </div>
 
     <!-- AUTH SCREEN -->
-    <div id="auth-container" class="w-full max-w-sm bg-white p-8 rounded-2xl shadow-xl fade-in">
+    <div id="auth-container" class="w-full max-w-sm bg-white p-8 rounded-2xl shadow-xl fade-in hidden">
         <div class="text-center mb-6">
             <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                 <i class="fas fa-cloud text-2xl text-blue-600"></i>
@@ -163,6 +163,21 @@
             </div>
             <ul id="list" class="space-y-2 pb-10"></ul>
         </div>
+
+        <!-- DATA BACKUP SECTION -->
+        <div class="w-full mt-4 mb-10 text-center border-t pt-4 border-slate-200">
+            <p class="text-[10px] text-slate-400 mb-2 uppercase tracking-widest font-bold">Data Safety</p>
+            <div class="flex gap-2 justify-center">
+                <button onclick="exportData()" class="text-xs bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 px-4 py-2 rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all">
+                    <i class="fas fa-cloud-download-alt text-blue-600"></i> Backup Save Karein
+                </button>
+                <button onclick="document.getElementById('import-file').click()" class="text-xs bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 px-4 py-2 rounded-lg font-semibold shadow-sm flex items-center gap-2 transition-all">
+                    <i class="fas fa-cloud-upload-alt text-green-600"></i> Restore Data
+                </button>
+                <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(this)">
+            </div>
+            <p class="text-[9px] text-slate-400 mt-2 italic">Save backup file to Google Drive/Email for long term safety.</p>
+        </div>
     </div>
 
     <!-- BUDGET MODAL -->
@@ -179,7 +194,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // CONFIG & STATE
@@ -198,25 +213,30 @@
         const expenseCategories = [{name:"Rent",type:"needs"},{name:"Groceries",type:"needs"},{name:"Bills",type:"needs"},{name:"Education",type:"needs"},{name:"Medical",type:"needs"},{name:"Transport",type:"needs"},{name:"Mobile/Data",type:"needs"},{name:"Food/Dining",type:"wants"},{name:"Shopping",type:"wants"},{name:"Gifts",type:"wants"},{name:"Savings",type:"savings"},{name:"Other",type:"wants"}];
         const incomeCategories = [{name:"Salary",type:"income"},{name:"Business",type:"income"},{name:"Bonus",type:"income"},{name:"Gift",type:"income"},{name:"Loan",type:"income"},{name:"Other",type:"income"}];
 
-        // INIT
+        // INIT & AUTH
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
         (async function init() {
             try {
-                // Ensure auth is ready before anything else
-                await signInAnonymously(auth);
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                // Keep auth container hidden, show app immediately
                 document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('auth-container').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                document.getElementById('app-container').classList.add('flex');
+                
                 setupDateInput();
-                // Initialize form state to ensure dropdowns are populated
                 window.toggleFormState();
             } catch (error) {
                 console.error("Auth Failed", error);
                 alert("Connection Error. Please refresh.");
             }
         })();
-
-        // AUTH HELPER
-        async function ensureAuth() {
-            if (!auth.currentUser) await signInAnonymously(auth);
-        }
 
         // --- AUTH FUNCTIONS ---
         window.toggleAuth = (mode) => {
@@ -238,7 +258,6 @@
             const pass = document.getElementById('login-pass').value.trim();
             if(!user || !pass) return alert("Enter Email and Password");
             
-            await ensureAuth();
             showLoading(true);
             try {
                 const safeId = user.replace(/[^a-z0-9]/g, '_'); 
@@ -267,7 +286,6 @@
             if(!email.includes('@')) return alert("Enter valid email");
             if(pin.length !== 4) return alert("PIN must be 4 digits");
             
-            await ensureAuth();
             showLoading(true);
             try {
                 const safeId = email.replace(/[^a-z0-9]/g, '_');
@@ -292,7 +310,6 @@
             const newPass = document.getElementById('forgot-pass').value.trim();
             if(!email || !pin || !newPass) return alert("Fill all fields");
             
-            await ensureAuth();
             showLoading(true);
             try {
                 const safeId = email.replace(/[^a-z0-9]/g, '_');
@@ -324,7 +341,6 @@
         async function saveData() {
             if(!currentUser) return;
             try {
-                await ensureAuth();
                 const safeId = currentUser.replace(/[^a-z0-9]/g, '_');
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'budget_users_shared', safeId);
                 await updateDoc(docRef, { transactions: transactions, budgetSettings: budgetSettings });
