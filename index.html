@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PDF & Excel Libraries -->
+    <!-- PDF & Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -19,7 +19,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         
-        /* Animations */
+        /* Smooth Animations */
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
@@ -27,46 +27,43 @@
         
         .fab-shadow { box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4); }
         
-        /* Nav Styles */
         .nav-item.active { color: #0d9488; }
         .nav-item { color: #94a3b8; transition: color 0.3s; }
         
-        /* Utility */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         select { -webkit-appearance: none; appearance: none; }
         
-        /* Guest View Specific */
         #guest-container { display: none; }
+        
+        /* Alert Animation */
+        .blink-red { animation: blinker 1.5s linear infinite; color: #ef4444; }
+        @keyframes blinker { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body class="text-slate-800 bg-slate-50">
 
-    <!-- === GUEST VIEW (Only for the borrower link) === -->
+    <!-- === GUEST VIEW === -->
     <div id="guest-container" class="w-full max-w-md mx-auto min-h-screen bg-white p-6 flex flex-col items-center justify-center text-center fade-in">
-        <div class="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mb-6">
+        <div class="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mb-6 shadow-sm border border-teal-100">
             <i class="fas fa-file-invoice-dollar text-3xl text-teal-600"></i>
         </div>
         <h1 class="text-2xl font-bold text-slate-800 mb-1">Madani Exp Tracker</h1>
-        <p class="text-xs text-teal-600 font-semibold mb-8">Junaid Madani</p>
-        
-        <div class="w-full bg-slate-50 p-6 rounded-3xl border border-slate-100 mb-6">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Customer Name</p>
-            <h2 class="text-xl font-bold text-slate-800 mb-4" id="guest-name">---</h2>
-            
-            <div class="h-px bg-slate-200 w-full mb-4"></div>
-            
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Pending Amount</p>
-            <h1 class="text-4xl font-black text-rose-600" id="guest-balance">₹0</h1>
+        <p class="text-xs text-teal-600 font-semibold mb-8 tracking-widest uppercase">Junaid Madani</p>
+        <div class="w-full bg-slate-50 p-8 rounded-3xl border border-slate-200 mb-6 shadow-sm">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Account Name</p>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6" id="guest-name">---</h2>
+            <div class="w-full border-t border-dashed border-slate-300 mb-6"></div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Pending Balance</p>
+            <h1 class="text-5xl font-black text-rose-600" id="guest-balance">₹0</h1>
         </div>
-
-        <p class="text-xs text-slate-400 max-w-xs leading-relaxed">
-            This is a current snapshot of your pending balance. Please contact the admin for detailed transaction history.
-        </p>
+        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 text-blue-800 text-xs leading-relaxed">
+            <i class="fas fa-info-circle mr-1"></i> This is a live snapshot of your pending dues.
+        </div>
     </div>
 
-    <!-- === MAIN APP CONTAINER (Admin View) === -->
+    <!-- === MAIN APP CONTAINER === -->
     <div id="main-container" class="w-full max-w-md mx-auto min-h-screen relative bg-white sm:shadow-xl overflow-hidden pb-[90px]">
         
         <!-- HEADER -->
@@ -75,17 +72,17 @@
                 <h1 class="text-lg font-bold text-teal-700 flex items-center gap-2">
                     <i class="fas fa-wallet"></i> Madani Exp Tracker
                 </h1>
-                <p class="text-[10px] text-teal-600 font-semibold ml-7 -mt-1">Junaid Madani</p>
+                <p class="text-[10px] text-teal-600 font-bold ml-7 -mt-1 tracking-wide">Junaid Madani</p>
             </div>
             <div class="text-right">
-                <p class="text-[10px] text-slate-400 uppercase tracking-wider">Net Worth</p>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Net Worth</p>
                 <h2 class="text-xl font-bold text-slate-800" id="total-balance">₹0</h2>
             </div>
         </header>
 
         <!-- === 1. HOME VIEW === -->
         <section id="view-home" class="p-4 fade-in block pb-24">
-            <!-- Account Cards -->
+            <!-- Cards -->
             <div class="grid grid-cols-3 gap-3 mb-5">
                 <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 text-center">
                     <div class="text-blue-600 mb-1 text-lg"><i class="fas fa-money-bill-wave"></i></div>
@@ -104,7 +101,7 @@
                 </div>
             </div>
 
-            <!-- Income/Expense Summary -->
+            <!-- Summary -->
             <div class="grid grid-cols-2 gap-3 mb-6">
                 <div onclick="showSummary('income')" class="cursor-pointer bg-emerald-50 p-4 rounded-xl border border-emerald-100 flex justify-between items-center active:scale-95 transition-transform">
                     <div>
@@ -122,7 +119,7 @@
                 </div>
             </div>
 
-            <!-- Analysis Section -->
+            <!-- Analysis -->
             <h3 class="font-bold text-slate-700 text-sm mb-3">Expense Analysis</h3>
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 mb-4">
                 <div class="flex justify-center mb-6 relative">
@@ -141,16 +138,14 @@
         <!-- === 2. REPORT VIEW === -->
         <section id="view-report" class="p-4 fade-in hidden pb-24">
             <h2 class="text-lg font-bold mb-4">Reports & History</h2>
-            
             <div class="flex gap-2 mb-4">
-                <button onclick="downloadPDF()" class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg text-xs font-bold shadow-lg shadow-slate-200 flex items-center justify-center gap-2">
+                <button onclick="downloadPDF()" class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg text-xs font-bold shadow-lg shadow-slate-200 flex items-center justify-center gap-2 active:scale-95">
                     <i class="fas fa-file-pdf"></i> PDF Report
                 </button>
-                <button onclick="downloadExcel()" class="flex-1 bg-green-700 text-white py-2.5 rounded-lg text-xs font-bold shadow-lg shadow-green-100 flex items-center justify-center gap-2">
+                <button onclick="downloadExcel()" class="flex-1 bg-green-700 text-white py-2.5 rounded-lg text-xs font-bold shadow-lg shadow-green-100 flex items-center justify-center gap-2 active:scale-95">
                     <i class="fas fa-file-excel"></i> Excel File
                 </button>
             </div>
-
             <h3 class="font-bold text-slate-700 text-sm mb-2">Recent Transactions</h3>
             <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                  <ul id="full-list" class="divide-y divide-slate-50"></ul>
@@ -167,18 +162,15 @@
             <div class="bg-orange-50 p-5 rounded-xl border border-orange-100 mb-4 text-center">
                 <p class="text-xs text-orange-800 uppercase font-bold tracking-wider mb-1">Total Udhar Market Mein</p>
                 <h1 class="text-3xl font-bold text-orange-600" id="udhar-total-display">₹0</h1>
-                
-                <button onclick="openNewUdharModal()" class="mt-4 w-full bg-orange-600 text-white py-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-2 active:scale-95 shadow-md shadow-orange-200">
+                <button onclick="openUdharModal()" class="mt-4 w-full bg-orange-600 text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95 shadow-md shadow-orange-200 transition-transform">
                     <i class="fas fa-user-plus"></i> Naya Udhar (New Contact)
                 </button>
             </div>
 
             <h3 class="font-bold text-slate-700 text-sm mb-3">Logon pe Baqaya (Active List)</h3>
-            
             <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <ul id="udhar-list" class="divide-y divide-slate-50"></ul>
             </div>
-            
             <p id="no-udhar-msg" class="text-center text-slate-400 text-xs py-10 hidden">No active loans.</p>
         </section>
 
@@ -188,35 +180,23 @@
             <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <button onclick="exportData()" class="w-full text-left p-4 hover:bg-slate-50 flex items-center gap-3 border-b border-slate-50">
                     <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fas fa-save"></i></div>
-                    <div>
-                        <p class="text-sm font-bold text-slate-700">Backup Data</p>
-                        <p class="text-[10px] text-slate-400">Save to device</p>
-                    </div>
+                    <div><p class="text-sm font-bold text-slate-700">Backup Data</p><p class="text-[10px] text-slate-400">Save to device</p></div>
                 </button>
                 <button onclick="document.getElementById('import-file').click()" class="w-full text-left p-4 hover:bg-slate-50 flex items-center gap-3 border-b border-slate-50">
                     <div class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center"><i class="fas fa-file-import"></i></div>
-                    <div>
-                        <p class="text-sm font-bold text-slate-700">Restore Data</p>
-                        <p class="text-[10px] text-slate-400">Import backup file</p>
-                    </div>
+                    <div><p class="text-sm font-bold text-slate-700">Restore Data</p><p class="text-[10px] text-slate-400">Import backup file</p></div>
                 </button>
                 <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(this)">
                 <button onclick="clearAll()" class="w-full text-left p-4 hover:bg-red-50 flex items-center gap-3 border-b border-slate-50">
                     <div class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center"><i class="fas fa-trash-alt"></i></div>
-                    <div>
-                        <p class="text-sm font-bold text-red-600">Reset App</p>
-                        <p class="text-[10px] text-red-400">Delete all data</p>
-                    </div>
+                    <div><p class="text-sm font-bold text-red-600">Reset App</p><p class="text-[10px] text-red-400">Delete all data</p></div>
                 </button>
                 <button onclick="exitApp()" class="w-full text-left p-4 hover:bg-slate-50 flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fas fa-power-off"></i></div>
-                    <div>
-                        <p class="text-sm font-bold text-slate-700">Exit App</p>
-                        <p class="text-[10px] text-slate-400">Close application</p>
-                    </div>
+                    <div><p class="text-sm font-bold text-slate-700">Exit App</p><p class="text-[10px] text-slate-400">Close application</p></div>
                 </button>
             </div>
-            <p class="text-center text-[10px] text-slate-300 mt-8">Madani Exp Tracker v1.0</p>
+            <p class="text-center text-[10px] text-slate-300 mt-8 font-semibold tracking-wide">Madani Exp Tracker v5.1</p>
         </section>
 
         <!-- === BOTTOM NAVIGATION === -->
@@ -229,13 +209,11 @@
                 <i class="fas fa-chart-pie text-lg"></i>
                 <span class="text-[9px] font-bold">Report</span>
             </button>
-            
             <div class="relative w-12 flex justify-center z-50">
-                <button onclick="openMainAddModal()" class="absolute -top-10 bg-teal-600 text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl fab-shadow transition-transform active:scale-90 border-[4px] border-slate-50">
+                <button onclick="openEntryModal()" class="absolute -top-10 bg-teal-600 text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl fab-shadow transition-transform active:scale-90 border-[4px] border-slate-50 shadow-lg shadow-teal-100">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
-
             <button onclick="switchView('udhar')" class="nav-item flex flex-col items-center gap-1" id="nav-udhar">
                 <i class="fas fa-hand-holding-usd text-lg"></i>
                 <span class="text-[9px] font-bold">Udhar</span>
@@ -247,43 +225,34 @@
         </nav>
     </div>
 
-    <!-- === ADD MODAL (INCOME / EXPENSE ONLY) === -->
-    <div id="add-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-end justify-center sm:items-center p-0 sm:p-4 transition-opacity">
+    <!-- === ENTRY MODAL (INCOME/EXPENSE) === -->
+    <div id="entry-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-end justify-center sm:items-center p-0 sm:p-4 transition-opacity">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 animate-fade-in-up shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-lg text-slate-800" id="add-modal-title">New Entry</h3>
-                <button onclick="toggleModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                <h3 class="font-bold text-lg text-slate-800" id="entry-modal-title">New Entry</h3>
+                <button onclick="closeEntryModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="space-y-4">
-                <div class="bg-slate-100 p-1 rounded-xl flex font-bold text-xs" id="type-tabs-wrapper">
+                <div class="bg-slate-100 p-1 rounded-xl flex font-bold text-xs">
                     <button onclick="setTxType('expense')" id="btn-expense" class="flex-1 py-3 rounded-lg transition-all shadow-sm bg-white text-rose-600">Expense</button>
                     <button onclick="setTxType('income')" id="btn-income" class="flex-1 py-3 rounded-lg text-slate-400 transition-all hover:text-slate-600">Income</button>
                 </div>
                 <input type="hidden" id="tx-type" value="expense">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Amount</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-3 text-slate-400 font-bold text-lg">₹</span>
-                        <input type="number" id="tx-amount" placeholder="0" class="w-full pl-10 p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xl text-slate-800 focus:outline-none focus:border-teal-500">
-                    </div>
+                    <input type="number" id="tx-amount" placeholder="0" class="w-full pl-4 p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xl text-slate-800 focus:outline-none focus:border-teal-500">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Category</label>
-                        <div class="relative">
-                            <select id="tx-category" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-teal-500 appearance-none"></select>
-                            <i class="fas fa-chevron-down absolute right-3 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
-                        </div>
+                        <select id="tx-category" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-teal-500"></select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Wallet</label>
-                        <div class="relative">
-                            <select id="tx-account" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-teal-500 appearance-none">
-                                <option value="Cash">Cash</option>
-                                <option value="Bank">Bank Account</option>
-                            </select>
-                            <i class="fas fa-chevron-down absolute right-3 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
-                        </div>
+                        <select id="tx-account" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-teal-500">
+                            <option value="Cash">Cash</option>
+                            <option value="Bank">Bank Account</option>
+                        </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -297,26 +266,23 @@
                     </div>
                 </div>
                 <button onclick="saveTransaction()" class="w-full bg-teal-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-500/30 hover:bg-teal-700 transition active:scale-95 flex justify-center items-center gap-2 mt-2">
-                    <i class="fas fa-check"></i> <span id="save-btn-text">Save Transaction</span>
+                    <i class="fas fa-check"></i> Save Transaction
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- === UDHAR MODAL (SEPARATE) === -->
+    <!-- === UDHAR MODAL === -->
     <div id="udhar-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-end justify-center sm:items-center p-0 sm:p-4 transition-opacity">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 animate-fade-in-up shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="font-bold text-lg text-slate-800">New Udhar Entry</h3>
-                <button onclick="document.getElementById('udhar-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                <button onclick="closeUdharModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Amount</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-3 text-slate-400 font-bold text-lg">₹</span>
-                        <input type="number" id="udhar-amount" placeholder="0" class="w-full pl-10 p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xl text-slate-800 focus:outline-none focus:border-orange-500">
-                    </div>
+                    <input type="number" id="udhar-amount" placeholder="0" class="w-full pl-4 p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xl text-slate-800 focus:outline-none focus:border-orange-500">
                 </div>
                 <button onclick="pickContact()" class="w-full py-3 bg-orange-50 border border-dashed border-orange-200 rounded-xl text-orange-600 font-bold text-xs flex items-center justify-center gap-2 hover:bg-orange-100 transition-colors">
                     <i class="fas fa-address-book text-lg"></i> Select from Contacts
@@ -333,7 +299,7 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-orange-700 uppercase mb-1 ml-1">From Wallet</label>
-                        <select id="udhar-source" class="w-full p-3 bg-white border border-orange-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-orange-500 appearance-none">
+                        <select id="udhar-source" class="w-full p-3 bg-white border border-orange-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-orange-500">
                             <option value="Cash">Cash</option>
                             <option value="Bank">Bank Account</option>
                         </select>
@@ -356,7 +322,7 @@
         </div>
     </div>
 
-    <!-- === SUMMARY MODAL === -->
+    <!-- === MODALS (Summary, Wusool, History, Contacts) === -->
     <div id="summary-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-fade-in-up">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
@@ -367,9 +333,8 @@
         </div>
     </div>
 
-    <!-- === WUSOOL MODAL === -->
     <div id="wusool-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl animate-fade-in-up">
             <h3 class="font-bold text-lg text-slate-800 mb-1">Receive Money</h3>
             <p class="text-xs text-slate-500 mb-4" id="wusool-msg">Settling...</p>
             <input type="hidden" id="wusool-person-name">
@@ -387,29 +352,22 @@
         </div>
     </div>
 
-    <!-- === PERSON HISTORY MODAL === -->
     <div id="person-history-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-fade-in-up" style="max-height: 85vh;">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
-                <div>
-                    <h3 class="font-bold text-lg text-slate-800" id="ph-name">Name</h3>
-                    <p class="text-[10px] text-slate-400">History</p>
-                </div>
+        <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[85vh] animate-fade-in-up">
+            <div class="flex justify-between items-center p-6 pb-2 border-b border-slate-50 shrink-0">
+                <h3 class="font-bold text-lg text-slate-800" id="ph-name">Name</h3>
                 <button onclick="document.getElementById('person-history-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <button id="btn-give-more" class="bg-orange-50 hover:bg-orange-100 border border-orange-100 text-orange-700 p-3 rounded-xl flex flex-col items-center gap-1 transition-all active:scale-95">
-                    <i class="fas fa-minus-circle text-lg"></i> <span class="text-xs font-bold">Give More</span>
-                </button>
-                <button id="btn-receive-money" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 text-emerald-700 p-3 rounded-xl flex flex-col items-center gap-1 transition-all active:scale-95">
-                    <i class="fas fa-plus-circle text-lg"></i> <span class="text-xs font-bold">Receive</span>
-                </button>
+            <div class="p-6 pt-4 overflow-y-auto space-y-4">
+                <div class="grid grid-cols-2 gap-3 mb-2">
+                    <button id="btn-give-more" class="bg-orange-50 hover:bg-orange-100 border border-orange-100 text-orange-700 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform"><i class="fas fa-minus-circle text-lg"></i> <span class="text-xs font-bold">Give More</span></button>
+                    <button id="btn-receive-money" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 text-emerald-700 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform"><i class="fas fa-plus-circle text-lg"></i> <span class="text-xs font-bold">Receive</span></button>
+                </div>
+                <div id="ph-content" class="space-y-3"></div>
             </div>
-            <div id="ph-content" class="space-y-3 overflow-y-auto no-scrollbar pb-4" style="max-height: 40vh;"></div>
         </div>
     </div>
 
-    <!-- === EXISTING CONTACTS SELECTOR MODAL === -->
     <div id="contacts-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl animate-fade-in-up">
             <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2">
@@ -421,26 +379,23 @@
     </div>
 
     <script>
-        // --- DATA & SETUP ---
+        // --- DATA & STATE ---
         let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-        // Fixed: Added chartInstance variable to avoid ReferenceError
         let chartInstance = null;
         let editingTransactionId = null;
         let lastOpenedPerson = null;
+        let currentView = 'home';
 
         const expenseCats = ["Food", "Rent", "Bills", "Transport", "Shopping", "Medical", "Education", "Charity", "Other"];
         const incomeCats = ["Salary", "Business", "Gift", "Bonus", "Loan Taken", "Other"];
-        
         const categoryIcons = {
             "Food": "fa-utensils text-orange-500", "Rent": "fa-home text-blue-500", "Bills": "fa-file-invoice-dollar text-red-500",
             "Transport": "fa-bus text-yellow-500", "Shopping": "fa-shopping-bag text-purple-500", "Medical": "fa-briefcase-medical text-green-500",
             "Education": "fa-graduation-cap text-indigo-500", "Charity": "fa-hand-holding-heart text-pink-500", "Other": "fa-shapes text-gray-500"
         };
-
         const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 });
 
         window.onload = function() {
-            // Check for Guest Mode
             const params = new URLSearchParams(window.location.search);
             if(params.get('guest') === 'true') {
                 document.getElementById('main-container').style.display = 'none';
@@ -465,7 +420,6 @@
             updateUI();
         }
 
-        // --- NAVIGATION ---
         function switchView(view) {
             ['home', 'report', 'udhar', 'settings'].forEach(v => {
                 document.getElementById('view-'+v).classList.add('hidden');
@@ -476,141 +430,36 @@
             const nav = document.getElementById('nav-'+view);
             nav.classList.add('active', 'text-teal-600');
             nav.classList.remove('text-slate-300');
-
+            
+            currentView = view; // Set current view for refreshes
+            
             if(view === 'home') updateChart();
             if(view === 'report') renderFullList();
             if(view === 'udhar') renderUdharList();
         }
 
-        // --- MAIN ADD MODAL ---
-        function openMainAddModal() {
-            const m = document.getElementById('add-modal');
-            m.classList.remove('hidden');
-            toggleModal(); 
+        // --- ENTRY MODAL LOGIC ---
+        function openEntryModal() {
+            editingTransactionId = null;
+            document.getElementById('entry-modal-title').innerText = "New Entry";
+            setTxType('expense');
+            document.getElementById('tx-amount').value = '';
+            document.getElementById('tx-note').value = '';
+            document.getElementById('entry-modal').classList.remove('hidden');
         }
 
-        function toggleModal() {
-            const m = document.getElementById('add-modal');
-            if(!m.classList.contains('hidden')) {
-                editingTransactionId = null;
-                document.getElementById('add-modal-title').innerText = "New Entry";
-                document.getElementById('save-btn-text').innerText = "Save Transaction";
-                setTxType('expense');
-                document.getElementById('tx-amount').value = '';
-                document.getElementById('tx-note').value = '';
-            } else {
-                m.classList.remove('hidden');
-                toggleModal();
-            }
-        }
-
-        // --- UDHAR MODAL ---
-        function openNewUdharModal() {
-            document.getElementById('person-history-modal').classList.add('hidden');
-            const m = document.getElementById('udhar-modal');
-            m.classList.remove('hidden');
-            document.getElementById('udhar-amount').value = '';
-            document.getElementById('udhar-person').value = '';
-            document.getElementById('udhar-phone').value = '';
-            updateDatalist();
-        }
-
-        function updateDatalist() {
-            const names = [...new Set(transactions.filter(t => t.type === 'udhar').map(t => t.person))];
-            const datalist = document.getElementById('udhar-names-list');
-            datalist.innerHTML = '';
-            names.forEach(name => {
-                const opt = document.createElement('option');
-                opt.value = name;
-                datalist.appendChild(opt);
-            });
-            const pInput = document.getElementById('udhar-person');
-            pInput.onchange = function() {
-                const existing = transactions.find(t => t.person === this.value && t.phone);
-                if(existing) document.getElementById('udhar-phone').value = existing.phone;
-            }
-        }
-
-        async function pickContact() {
-            if ('contacts' in navigator && 'ContactsManager' in window) {
-                try {
-                    const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
-                    if (contacts.length) {
-                        document.getElementById('udhar-person').value = contacts[0].name[0];
-                        if (contacts[0].tel && contacts[0].tel.length) document.getElementById('udhar-phone').value = contacts[0].tel[0].replace(/\D/g, ''); 
-                    }
-                    return; 
-                } catch (ex) {}
-            }
-            showAppContactList();
-        }
-
-        function showAppContactList() {
-            const names = [...new Set(transactions.filter(t => t.type === 'udhar').map(t => t.person))];
-            const listDiv = document.getElementById('contacts-list-content');
-            listDiv.innerHTML = '';
-            if(names.length === 0) listDiv.innerHTML = '<p class="text-center text-xs text-slate-400">No contacts saved yet.</p>';
-            else {
-                names.forEach(name => {
-                    const btn = document.createElement('button');
-                    btn.className = "w-full text-left p-3 bg-slate-50 hover:bg-slate-100 rounded-lg text-sm font-bold text-slate-700 flex items-center gap-3";
-                    btn.innerHTML = `<div class="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-xs">${name.charAt(0)}</div> ${name}`;
-                    btn.onclick = () => {
-                        document.getElementById('udhar-person').value = name;
-                        const existing = transactions.find(t => t.person === name && t.phone);
-                        if(existing) document.getElementById('udhar-phone').value = existing.phone;
-                        document.getElementById('contacts-modal').classList.add('hidden');
-                    };
-                    listDiv.appendChild(btn);
-                });
-            }
-            document.getElementById('contacts-modal').classList.remove('hidden');
-        }
-
-        function timeAgo(dateStr) {
-            const date = new Date(dateStr);
-            const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (diffDays <= 1) return 'Today';
-            if (diffDays === 2) return 'Yesterday';
-            return `${diffDays} days ago`;
-        }
-
-        function showSummary(type) {
-            const modal = document.getElementById('summary-modal');
-            const title = document.getElementById('summary-title');
-            const content = document.getElementById('summary-content');
-            const filtered = transactions.filter(t => t.type === type);
-            const total = filtered.reduce((sum, t) => sum + t.amount, 0);
-            const categories = {};
-            filtered.forEach(t => { categories[t.desc] = (categories[t.desc] || 0) + t.amount; });
-            title.innerText = type === 'income' ? 'Income Breakdown' : 'Expense Breakdown';
-            title.className = `font-bold text-lg ${type === 'income' ? 'text-emerald-700' : 'text-rose-700'}`;
-            if (filtered.length === 0) content.innerHTML = '<div class="text-center py-8 opacity-50"><i class="fas fa-clipboard-list text-4xl mb-2"></i><p class="text-sm">No records found.</p></div>';
-            else {
-                let html = `<div class="mb-5 text-center bg-slate-50 p-4 rounded-xl border border-slate-100"><p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Total ${type}</p><h2 class="text-3xl font-bold ${type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">${formatter.format(total)}</h2></div>`;
-                const sortedCats = Object.entries(categories).sort((a,b) => b[1] - a[1]);
-                html += '<ul class="space-y-3">';
-                sortedCats.forEach(([cat, amount]) => {
-                    const percent = ((amount / total) * 100).toFixed(1);
-                    const barColor = type === 'income' ? 'bg-emerald-500' : 'bg-rose-500';
-                    const iconClass = categoryIcons[cat] || "fa-circle text-slate-400";
-                    html += `<li><div class="flex justify-between items-center mb-1 text-sm"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs"><i class="fas ${iconClass}"></i></div><span class="font-bold text-slate-700">${cat}</span></div><div class="text-right leading-none"><span class="font-bold block text-slate-800">${formatter.format(amount)}</span><span class="text-[9px] text-slate-400 font-bold">${percent}%</span></div></div><div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden ml-8 w-[calc(100%-2rem)]"><div class="h-full ${barColor} rounded-full" style="width: ${percent}%"></div></div></li>`;
-                });
-                html += '</ul>';
-                content.innerHTML = html;
-            }
-            modal.classList.remove('hidden');
+        function closeEntryModal() {
+            document.getElementById('entry-modal').classList.add('hidden');
         }
 
         function setTxType(type) {
             document.getElementById('tx-type').value = type;
             const btns = { expense: document.getElementById('btn-expense'), income: document.getElementById('btn-income') };
-            Object.values(btns).forEach(b => { b.className = 'flex-1 py-3 rounded-lg text-xs font-bold text-slate-400 transition-all hover:text-slate-600'; });
-            const activeClass = "flex-1 py-3 rounded-lg text-xs font-bold transition-all shadow-sm bg-white";
+            Object.values(btns).forEach(b => { b.className = 'flex-1 py-3 rounded-lg text-slate-400 transition-all hover:text-slate-600'; });
+            
+            const activeClass = "flex-1 py-3 rounded-lg font-bold transition-all shadow-sm bg-white";
             if(type === 'expense') { btns.expense.className = `${activeClass} text-rose-600`; populateCats(expenseCats); }
-            else if(type === 'income') { btns.income.className = `${activeClass} text-emerald-600`; populateCats(incomeCats); }
+            else { btns.income.className = `${activeClass} text-emerald-600`; populateCats(incomeCats); }
         }
 
         function populateCats(cats) {
@@ -630,14 +479,116 @@
             const note = document.getElementById('tx-note').value;
             const cat = document.getElementById('tx-category').value;
             const acc = document.getElementById('tx-account').value;
+
             if(!amount || amount <= 0) return alert("Enter valid amount");
-            let entry = { id: Date.now(), date: date, amount: amount, type: type, note: note, desc: cat, account: acc };
+
+            if (editingTransactionId) {
+                const idx = transactions.findIndex(t => t.id === editingTransactionId);
+                if (idx !== -1) {
+                    transactions[idx] = { ...transactions[idx], amount, date, note, type, desc: cat, account: acc };
+                    saveData();
+                    closeEntryModal();
+                    if(currentView === 'home') updateChart();
+                    if(currentView === 'report') renderFullList();
+                    updateUI();
+                    return;
+                }
+            }
+
+            const entry = { id: Date.now(), date, amount, type, note, desc: cat, account: acc };
             transactions.push(entry);
             saveData();
-            document.getElementById('add-modal').classList.add('hidden');
-            if(view === 'home') updateChart(); // Refresh chart if on home
-            if(view === 'report') renderFullList(); // Refresh list if on report
-            updateUI(); // Refresh totals
+            closeEntryModal();
+            if(currentView === 'home') updateChart();
+            if(currentView === 'report') renderFullList();
+            updateUI();
+        }
+
+        function editTransaction(id) {
+            const t = transactions.find(tx => tx.id === id);
+            if (!t) return;
+            if(t.type === 'udhar' || t.type.includes('Recovery')) return alert("Edit loans in Udhar tab");
+
+            editingTransactionId = id;
+            document.getElementById('entry-modal-title').innerText = "Edit Entry";
+            setTxType(t.type);
+            document.getElementById('tx-amount').value = t.amount;
+            document.getElementById('tx-date').value = t.date;
+            document.getElementById('tx-note').value = t.note || '';
+            document.getElementById('tx-category').value = t.desc;
+            document.getElementById('tx-account').value = t.account;
+            document.getElementById('entry-modal').classList.remove('hidden');
+        }
+
+        function deleteTransaction(id) {
+            if(!confirm("Delete this entry?")) return;
+            transactions = transactions.filter(t => t.id !== id);
+            saveData();
+            if(currentView === 'report') renderFullList();
+            if(currentView === 'udhar' && lastOpenedPerson) openPersonDetails(lastOpenedPerson);
+            updateUI();
+        }
+
+        // --- UDHAR LOGIC ---
+        function openUdharModal() {
+            document.getElementById('person-history-modal').classList.add('hidden');
+            document.getElementById('udhar-amount').value = '';
+            document.getElementById('udhar-person').value = '';
+            document.getElementById('udhar-phone').value = '';
+            updateDatalist();
+            document.getElementById('udhar-modal').classList.remove('hidden');
+        }
+        
+        function closeUdharModal() {
+            document.getElementById('udhar-modal').classList.add('hidden');
+        }
+
+        function updateDatalist() {
+            const names = [...new Set(transactions.filter(t => t.type === 'udhar').map(t => t.person))];
+            const datalist = document.getElementById('udhar-names-list');
+            datalist.innerHTML = '';
+            names.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                datalist.appendChild(opt);
+            });
+            document.getElementById('udhar-person').onchange = function() {
+                const existing = transactions.find(t => t.person === this.value && t.phone);
+                if(existing) document.getElementById('udhar-phone').value = existing.phone;
+            }
+        }
+
+        async function pickContact() {
+            try {
+                if ('contacts' in navigator && 'ContactsManager' in window) {
+                    const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+                    if (contacts.length) {
+                        document.getElementById('udhar-person').value = contacts[0].name[0];
+                        if (contacts[0].tel && contacts[0].tel.length) document.getElementById('udhar-phone').value = contacts[0].tel[0].replace(/\D/g, ''); 
+                        return;
+                    }
+                }
+            } catch(e) {}
+            showAppContactList();
+        }
+
+        function showAppContactList() {
+            const names = [...new Set(transactions.filter(t => t.type === 'udhar').map(t => t.person))];
+            const listDiv = document.getElementById('contacts-list-content');
+            listDiv.innerHTML = names.length ? '' : '<p class="text-xs text-slate-400 text-center">No contacts saved.</p>';
+            names.forEach(name => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3 bg-slate-50 rounded-lg text-sm font-bold text-slate-700 flex items-center gap-3 hover:bg-slate-100";
+                btn.innerHTML = `<div class="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-xs">${name.charAt(0)}</div> ${name}`;
+                btn.onclick = () => {
+                    document.getElementById('udhar-person').value = name;
+                    const existing = transactions.find(t => t.person === name && t.phone);
+                    if(existing) document.getElementById('udhar-phone').value = existing.phone;
+                    document.getElementById('contacts-modal').classList.add('hidden');
+                };
+                listDiv.appendChild(btn);
+            });
+            document.getElementById('contacts-modal').classList.remove('hidden');
         }
 
         function saveUdharTransaction() {
@@ -651,24 +602,66 @@
             if(!amount || amount <= 0) return alert("Enter valid amount");
             if(!person) return alert("Person name required");
 
-            let entry = { id: Date.now(), date: date, amount: amount, type: 'udhar', note: '', desc: `Loan to ${person}`, person: person, phone: phone, account: source, returnDate: rDate, isUdhar: true, status: 'active' };
+            const entry = {
+                id: Date.now(),
+                date, amount, type: 'udhar',
+                note: '',
+                desc: `Loan to ${person}`,
+                person, phone, account: source, returnDate: rDate,
+                isUdhar: true, status: 'active'
+            };
+
             transactions.push(entry);
             saveData();
-            document.getElementById('udhar-modal').classList.add('hidden');
+            closeUdharModal();
+            
             if(lastOpenedPerson === person) openPersonDetails(person);
             renderUdharList();
-
+            
             if(phone) {
                 const cleanPhone = phone.replace(/\D/g, '');
                 const finalPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-                // Generate Smart Link
                 const baseUrl = window.location.href.split('?')[0];
                 const totalPending = transactions.filter(t => t.type === 'udhar' && t.status === 'active' && t.person === person).reduce((sum, t) => sum + (t.amount - (t.repaid || 0)), 0);
                 const link = `${baseUrl}?guest=true&n=${encodeURIComponent(person)}&b=${totalPending}`;
-                
                 const msg = `Salam%0A${person},%0AAapne ₹${amount} udhaar liye hain.%0AWapas karne ki tareekh: ${rDate || 'Tay nahi hui'}.%0A%0ACheck Balance here:%0A${link}`;
                 window.open(`https://wa.me/${finalPhone}?text=${msg}`, '_blank');
             }
+        }
+
+        // --- HELPER FUNCTIONS ---
+        function timeAgo(dateStr) {
+            const diffDays = Math.ceil(Math.abs(new Date() - new Date(dateStr)) / (1000 * 60 * 60 * 24));
+            if (diffDays <= 1) return 'Today';
+            if (diffDays === 2) return 'Yesterday';
+            return `${diffDays} days ago`;
+        }
+
+        function showSummary(type) {
+            const modal = document.getElementById('summary-modal');
+            const title = document.getElementById('summary-title');
+            const content = document.getElementById('summary-content');
+            const filtered = transactions.filter(t => t.type === type);
+            const total = filtered.reduce((sum, t) => sum + t.amount, 0);
+            const categories = {};
+            filtered.forEach(t => { categories[t.desc] = (categories[t.desc] || 0) + t.amount; });
+
+            title.innerText = type === 'income' ? 'Income Breakdown' : 'Expense Breakdown';
+            title.className = `font-bold text-lg ${type === 'income' ? 'text-emerald-700' : 'text-rose-700'}`;
+            
+            if (filtered.length === 0) content.innerHTML = '<p class="text-center text-xs text-slate-400 py-8">No records found.</p>';
+            else {
+                let html = `<div class="mb-4 text-center bg-slate-50 p-4 rounded-xl border border-slate-100"><p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Total</p><h2 class="text-3xl font-bold ${type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">${formatter.format(total)}</h2></div><ul class="space-y-3">`;
+                Object.entries(categories).sort((a,b) => b[1] - a[1]).forEach(([cat, amount]) => {
+                    const percent = ((amount / total) * 100).toFixed(1);
+                    const barColor = type === 'income' ? 'bg-emerald-500' : 'bg-rose-500';
+                    const iconClass = categoryIcons[cat] || "fa-circle text-slate-400";
+                    html += `<li><div class="flex justify-between items-center mb-1 text-sm"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs"><i class="fas ${iconClass}"></i></div><span class="font-bold text-slate-700">${cat}</span></div><div class="text-right leading-none"><span class="font-bold block text-slate-800">${formatter.format(amount)}</span><span class="text-[9px] text-slate-400 font-bold">${percent}%</span></div></div><div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden ml-8 w-[calc(100%-2rem)]"><div class="h-full ${barColor} rounded-full" style="width: ${percent}%"></div></div></li>`;
+                });
+                html += '</ul>';
+                content.innerHTML = html;
+            }
+            modal.classList.remove('hidden');
         }
 
         function giveMoreUdhar(name) {
@@ -681,7 +674,7 @@
         function updateUI() {
             let cash = 0, bank = 0, udhar = 0, income = 0, expense = 0;
             transactions.forEach(t => {
-                if(t.type === 'income') { income += t.amount; t.account === 'Cash' ? cash += t.amount : bank += t.amount; } 
+                if(t.type === 'income') { income += t.amount; t.account === 'Cash' ? cash += t.amount : bank += t.amount; }
                 else if(t.type === 'expense') { expense += t.amount; t.account === 'Cash' ? cash -= t.amount : bank -= t.amount; }
                 else if(t.type === 'udhar' && t.status === 'active') {
                     const paid = t.repaid || 0;
@@ -706,9 +699,13 @@
             const people = {};
             transactions.forEach(t => {
                 if(t.type === 'udhar' && t.status === 'active') {
-                    if(!people[t.person]) people[t.person] = { name: t.person, total: 0, repaid: 0, lastTxDate: t.date };
+                    if(!people[t.person]) people[t.person] = { name: t.person, total: 0, repaid: 0, lastTxDate: t.date, returnDate: t.returnDate };
                     people[t.person].total += t.amount;
                     people[t.person].repaid += (t.repaid || 0);
+                    if(t.returnDate) {
+                        const days = Math.ceil((new Date(t.returnDate) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+                        if(days <= 1) people[t.person].isDue = true;
+                    }
                     if(new Date(t.date) > new Date(people[t.person].lastTxDate)) people[t.person].lastTxDate = t.date;
                 }
             });
@@ -719,19 +716,11 @@
             activePeople.forEach(p => {
                 const remaining = p.total - p.repaid;
                 const initial = p.name.charAt(0).toUpperCase();
+                const warning = p.isDue ? '<i class="fas fa-exclamation-circle text-red-500 ml-2 blink-red" title="Due Soon"></i>' : '';
                 const li = document.createElement('li');
                 li.onclick = () => openPersonDetails(p.name);
                 li.className = "bg-white p-4 flex items-center justify-between hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-b-0";
-                li.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold shadow-sm">${initial}</div>
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-sm">${p.name}</h4>
-                            <p class="text-[10px] text-slate-400">${timeAgo(p.lastTxDate)}</p>
-                        </div>
-                    </div>
-                    <span class="font-bold text-emerald-600 text-sm">${formatter.format(remaining)}</span>
-                `;
+                li.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold shadow-sm">${initial}</div><div><h4 class="font-bold text-slate-800 text-sm flex items-center">${p.name} ${warning}</h4><p class="text-[10px] text-slate-400">${timeAgo(p.lastTxDate)}</p></div></div><span class="font-bold text-emerald-600 text-sm">${formatter.format(remaining)}</span>`;
                 list.appendChild(li);
             });
         }
@@ -740,15 +729,14 @@
             lastOpenedPerson = name;
             const modal = document.getElementById('person-history-modal');
             document.getElementById('ph-name').innerText = name;
-            modal.classList.remove('hidden'); 
+            modal.classList.remove('hidden');
             
             document.getElementById('btn-give-more').onclick = () => giveMoreUdhar(name);
             document.getElementById('btn-receive-money').onclick = () => openWusoolForPerson(name);
-
+            
             const content = document.getElementById('ph-content');
             content.innerHTML = '';
             const related = transactions.filter(t => (t.type === 'udhar' && t.person === name) || (t.type === 'income' && t.desc === `Recovery: ${name}`)).sort((a,b) => b.id - a.id);
-
             if(related.length === 0) content.innerHTML = '<p class="text-center text-xs text-slate-400">No history.</p>';
             else {
                 related.forEach(t => {
@@ -756,7 +744,7 @@
                     let color = isRecovery ? 'text-green-600' : 'text-orange-600';
                     let icon = isRecovery ? 'fa-arrow-down' : 'fa-arrow-up';
                     let label = isRecovery ? 'Received' : 'Given';
-                    content.innerHTML += `<div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg"><div class="flex items-center gap-3"><i class="fas ${icon} text-xs text-slate-400"></i><div><p class="font-bold text-xs text-slate-700">${label}</p><p class="text-[10px] text-slate-400">${t.date}</p></div></div><span class="font-bold text-sm ${color}">${formatter.format(t.amount)}</span></div>`;
+                    content.innerHTML += `<div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg relative"><div class="flex items-center gap-3"><i class="fas ${icon} text-xs text-slate-400"></i><div><p class="font-bold text-xs text-slate-700">${label}</p><p class="text-[10px] text-slate-400">${t.date}</p></div></div><div class="text-right"><span class="font-bold text-sm ${color} block">${formatter.format(t.amount)}</span><div class="flex gap-2 justify-end mt-1"><button onclick="editTransaction(${t.id}); document.getElementById('person-history-modal').classList.add('hidden');" class="text-slate-400 hover:text-blue-500 text-[10px]"><i class="fas fa-pencil-alt"></i></button><button onclick="deleteTransaction(${t.id})" class="text-slate-400 hover:text-red-500 text-[10px]"><i class="fas fa-trash"></i></button></div></div></div>`;
                 });
             }
         }
@@ -778,9 +766,11 @@
             const receivedAmount = parseFloat(document.getElementById('wusool-amount').value);
             const targetAcc = document.getElementById('wusool-account').value;
             if (!receivedAmount || receivedAmount <= 0) return alert("Enter valid amount");
+            
             let personLoans = transactions.filter(tx => tx.type === 'udhar' && tx.status === 'active' && tx.person === person);
             personLoans.sort((a, b) => a.id - b.id);
             let remainingToAllocate = receivedAmount;
+            
             for (let tx of personLoans) {
                 if (remainingToAllocate <= 0) break;
                 const pendingOnTx = tx.amount - (tx.repaid || 0);
@@ -789,6 +779,7 @@
                 remainingToAllocate -= allocation;
                 if (tx.amount - tx.repaid <= 0.1) tx.status = 'settled';
             }
+            
             const recoveryEntry = { id: Date.now(), date: new Date().toISOString().split('T')[0], amount: receivedAmount, type: 'income', desc: `Recovery: ${person}`, account: targetAcc, note: `Udhar recovered` };
             transactions.push(recoveryEntry);
             saveData();
@@ -802,10 +793,8 @@
             if (lastTx && lastTx.phone) {
                 const cleanPhone = lastTx.phone.replace(/\D/g, '');
                 const finalPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-                // Smart Link for Wusool
                 const baseUrl = window.location.href.split('?')[0];
                 const link = `${baseUrl}?guest=true&n=${encodeURIComponent(person)}&b=${totalRemaining}`;
-                
                 let msg = totalRemaining > 0 ? `Salam%0A${person},%0AAaj aapki taraf se ₹${receivedAmount} receive hue.%0ABaaki: ₹${totalRemaining}.%0A%0ACheck Balance:${link}` : `${person},%0AAaj aapki taraf se ₹${receivedAmount} receive hue.%0AShukriya.`;
                 window.open(`https://wa.me/${finalPhone}?text=${msg}`, '_blank');
             }
@@ -821,13 +810,19 @@
                 const details = t.note ? `• ${t.note}` : '';
                 const li = document.createElement('li');
                 li.className = "p-4 flex justify-between items-center border-b border-slate-50 last:border-b-0";
-                li.innerHTML = `<div class="flex flex-col gap-0.5"><div class="font-bold text-sm text-slate-700">${t.desc} <span class="font-normal text-slate-400 text-xs">${details}</span></div><div class="text-[10px] text-slate-400 flex items-center gap-2"><span>${t.date}</span><span class="uppercase text-[9px] font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-500">${t.type}</span></div></div><div class="text-sm font-bold ${color}">${sign}${formatter.format(t.amount)}</div>`;
+                
+                // Edit/Delete for Income/Expense Only
+                let actions = '';
+                if(t.type !== 'udhar' && !t.type.includes('Recovery')) {
+                    actions = `<div class="flex gap-2 ml-2"><button onclick="editTransaction(${t.id})" class="text-slate-400 hover:text-blue-500 text-[10px]"><i class="fas fa-pencil-alt"></i></button><button onclick="deleteTransaction(${t.id})" class="text-slate-400 hover:text-red-500 text-[10px]"><i class="fas fa-trash"></i></button></div>`;
+                }
+
+                li.innerHTML = `<div class="flex-1 flex flex-col gap-0.5"><div class="font-bold text-sm text-slate-700">${t.desc} <span class="font-normal text-slate-400 text-xs">${details}</span></div><div class="text-[10px] text-slate-400 flex items-center gap-2"><span>${t.date}</span><span class="uppercase text-[9px] font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-500">${t.type}</span></div></div><div class="flex items-center"><div class="text-sm font-bold ${color}">${sign}${formatter.format(t.amount)}</div>${actions}</div>`;
                 list.appendChild(li);
             });
         }
 
         function updateChart() {
-            // ... (Same chart logic) ...
              const ctx = document.getElementById('expenseChart').getContext('2d');
             const legendContainer = document.getElementById('analysis-legend');
             const expenses = {};
@@ -844,26 +839,13 @@
             });
         }
 
-        function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(18); doc.setTextColor(13, 148, 136); doc.text("Madani Budget Report", 14, 20);
-            doc.setFontSize(10); doc.setTextColor(100); doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
-            const rows = transactions.slice().reverse().map(t => {
-                const dateObj = new Date(t.id);
-                const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                return [{ content: `${t.date}\n${timeStr}`, styles: { halign: 'center' } }, t.desc, t.note || '-', t.type.toUpperCase(), t.account, { content: formatter.format(t.amount).replace('₹', ''), styles: { halign: 'right', fontStyle: 'bold' } }];
-            });
-            doc.autoTable({ head: [['Date & Time', 'Category', 'Details', 'Type', 'Account', 'Amount']], body: rows, startY: 35, theme: 'grid', styles: { fontSize: 8, cellPadding: 3 }, headStyles: { fillColor: [13, 148, 136] } });
-            doc.save('Madani_Budget_Report.pdf');
-        }
-
-        // ... [Excel, Export, Import, Clear, Exit functions same as before] ...
-        function downloadExcel() { const ws = XLSX.utils.json_to_sheet(transactions); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Transactions"); XLSX.writeFile(wb, "budget_data.xlsx"); }
+        // ... [Export/Import/Clear logic unchanged] ...
+        function downloadPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.setFontSize(18); doc.setTextColor(13, 148, 136); doc.text("Madani Exp Tracker Report", 14, 20); doc.setFontSize(10); doc.setTextColor(100); doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28); const rows = transactions.slice().reverse().map(t => { const dateObj = new Date(t.id); const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); return [{ content: `${t.date}\n${timeStr}`, styles: { halign: 'center' } }, t.desc, t.note || '-', t.type.toUpperCase(), t.account, { content: formatter.format(t.amount).replace('₹', ''), styles: { halign: 'right', fontStyle: 'bold' } }]; }); doc.autoTable({ head: [['Date & Time', 'Category', 'Details', 'Type', 'Account', 'Amount']], body: rows, startY: 35, theme: 'grid', styles: { fontSize: 8, cellPadding: 3 }, headStyles: { fillColor: [13, 148, 136] } }); doc.save('Madani_Report.pdf'); }
+        function downloadExcel() { const ws = XLSX.utils.json_to_sheet(transactions); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Transactions"); XLSX.writeFile(wb, "Madani_Data.xlsx"); }
         function exportData() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactions)); const a = document.createElement('a'); a.href = dataStr; a.download = "backup.json"; a.click(); }
         function importData(input) { const reader = new FileReader(); reader.onload = function(e) { transactions = JSON.parse(e.target.result); saveData(); alert("Data Restored!"); }; reader.readAsText(input.files[0]); }
-        function clearAll() { if(confirm("⚠️ Critical Warning:\n\nYou are about to delete all transaction history and reset the application.\n\nThis action cannot be undone. Are you sure you want to proceed?")) { transactions = []; saveData(); updateUI(); alert("Application reset successfully."); } }
-        function exitApp() { if(confirm("Are you sure you want to exit the application?")) { window.close(); if(!window.closed) alert("Browser security prevented automatic closing. Please close the tab manually."); } }
+        function clearAll() { if(confirm("⚠️ Critical Warning:\nReset App?")) { transactions = []; saveData(); updateUI(); alert("Reset Done."); } }
+        function exitApp() { if(confirm("Exit App?")) { window.close(); if(!window.closed) alert("Close tab manually."); } }
     </script>
 </body>
 </html>
