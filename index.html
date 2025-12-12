@@ -68,7 +68,7 @@
                 </div>
                 <div class="bg-orange-50 p-3 rounded-2xl border border-orange-100 text-center relative">
                     <div class="text-orange-500 mb-1 text-lg"><i class="fas fa-hand-holding-usd"></i></div>
-                    <p class="text-[10px] text-slate-500 uppercase font-bold">Udhar</p>
+                    <p class="text-[10px] text-slate-500 uppercase font-bold">Udhar (Pending)</p>
                     <p class="text-sm font-bold text-orange-600" id="udhar-balance">₹0</p>
                 </div>
             </div>
@@ -178,7 +178,7 @@
                     </div>
                 </button>
             </div>
-            <p class="text-center text-[10px] text-slate-300 mt-8">Madani Budget v3.2 Pro</p>
+            <p class="text-center text-[10px] text-slate-300 mt-8">Madani Budget v3.3 Pro</p>
         </section>
     </div>
 
@@ -281,13 +281,17 @@
         </div>
     </div>
 
-    <!-- === WUSOOL MODAL (Recover Money) === -->
+    <!-- === WUSOOL MODAL (Recover Money - Updated) === -->
     <div id="wusool-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl">
             <h3 class="font-bold text-lg mb-1">Money Received?</h3>
             <p class="text-xs text-slate-500 mb-4" id="wusool-msg">Settling udhar for...</p>
             <input type="hidden" id="wusool-id">
+            <input type="hidden" id="wusool-person-name">
             
+            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Received Amount (₹)</label>
+            <input type="number" id="wusool-amount" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-lg font-bold text-slate-800 mb-3 focus:outline-none focus:border-teal-500">
+
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Deposit To</label>
             <select id="wusool-account" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold mb-4">
                 <option value="Cash">Cash (Cash +)</option>
@@ -560,7 +564,9 @@
                     if(t.account === 'Cash') cash -= t.amount; else bank -= t.amount;
                 }
                 else if(t.type === 'udhar' && t.status === 'active') {
-                    udhar += t.amount;
+                    const paid = t.repaid || 0;
+                    const rem = t.amount - paid;
+                    udhar += rem;
                     if(t.account === 'Cash') cash -= t.amount; else bank -= t.amount;
                 }
             });
@@ -586,6 +592,7 @@
             else document.getElementById('no-udhar-msg').classList.add('hidden');
 
             loans.forEach(t => {
+                const remaining = t.amount - (t.repaid || 0);
                 const li = document.createElement('li');
                 li.className = "bg-white p-4 rounded-2xl border border-orange-100 shadow-sm relative overflow-hidden";
                 li.innerHTML = `
@@ -594,7 +601,10 @@
                             <h4 class="font-bold text-slate-800">${t.person}</h4>
                             <p class="text-[10px] text-slate-400">Given from: ${t.account}</p>
                         </div>
-                        <h3 class="font-bold text-orange-600">${formatter.format(t.amount)}</h3>
+                        <div class="text-right">
+                            <h3 class="font-bold text-orange-600">${formatter.format(remaining)}</h3>
+                            <p class="text-[9px] text-slate-400">Total: ${formatter.format(t.amount)}</p>
+                        </div>
                     </div>
                     <div class="flex justify-between items-center relative z-10 mt-2">
                         <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">
@@ -615,54 +625,84 @@
 
         function openWusool(id) {
             const t = transactions.find(x => x.id === id);
-            document.getElementById('wusool-id').value = id;
-            document.getElementById('wusool-msg').innerText = `Recovering ₹${t.amount} from ${t.person}`;
+            if (!t) return;
+            
+            const person = t.person;
+            // Calculate total pending for this person across ALL active entries
+            const personLoans = transactions.filter(tx => tx.type === 'udhar' && tx.status === 'active' && tx.person === person);
+            const totalPending = personLoans.reduce((sum, tx) => sum + (tx.amount - (tx.repaid || 0)), 0);
+
+            document.getElementById('wusool-id').value = id; // Strictly ref
+            document.getElementById('wusool-person-name').value = person;
+            
+            document.getElementById('wusool-msg').innerText = `Total Pending for ${person}: ${formatter.format(totalPending)}`;
+            document.getElementById('wusool-amount').value = '';
+            
             document.getElementById('wusool-modal').classList.remove('hidden');
         }
 
         function confirmWusool() {
-            const id = parseInt(document.getElementById('wusool-id').value);
+            const person = document.getElementById('wusool-person-name').value;
+            const receivedAmount = parseFloat(document.getElementById('wusool-amount').value);
             const targetAcc = document.getElementById('wusool-account').value;
+
+            if (!receivedAmount || receivedAmount <= 0) return alert("Please enter valid amount");
+
+            // Get all active loans for this person, sorted by date/id (Oldest first)
+            let personLoans = transactions.filter(tx => tx.type === 'udhar' && tx.status === 'active' && tx.person === person);
+            personLoans.sort((a, b) => a.id - b.id);
+
+            let remainingToAllocate = receivedAmount;
             
-            const idx = transactions.findIndex(t => t.id === id);
-            if(idx > -1) {
-                const originalTx = transactions[idx];
-                transactions[idx].status = 'settled';
-                
-                const recoveryEntry = {
-                    id: Date.now(),
-                    date: new Date().toISOString().split('T')[0],
-                    amount: originalTx.amount,
-                    type: 'income',
-                    desc: `Recovery: ${originalTx.person}`,
-                    account: targetAcc,
-                    note: 'Udhar recovered'
-                };
-                transactions.push(recoveryEntry);
-                saveData();
-                document.getElementById('wusool-modal').classList.add('hidden');
-                renderUdharList();
+            for (let tx of personLoans) {
+                if (remainingToAllocate <= 0) break;
 
-                // Calculate Remaining Balance for this Person
-                const personName = originalTx.person;
-                const remaining = transactions
-                    .filter(t => t.type === 'udhar' && t.status === 'active' && t.person === personName)
-                    .reduce((sum, t) => sum + t.amount, 0);
+                const pendingOnTx = tx.amount - (tx.repaid || 0);
+                const allocation = Math.min(pendingOnTx, remainingToAllocate);
 
-                // Send WhatsApp Message if phone exists
-                if (originalTx.phone) {
-                    const cleanPhone = originalTx.phone.replace(/\D/g, '');
-                    const finalPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-                    let msg = "";
-                    
-                    if (remaining > 0) {
-                        msg = `Salam%0A${personName},%0AAaj aapki taraf se ₹${originalTx.amount} receive hue.%0ABaaki: ₹${remaining}.%0AShukriya.`;
-                    } else {
-                        msg = `${personName},%0AAaj aapki taraf se ₹${originalTx.amount} receive hue.%0AShukriya.`;
-                    }
-                    
-                    window.open(`https://wa.me/${finalPhone}?text=${msg}`, '_blank');
+                tx.repaid = (tx.repaid || 0) + allocation;
+                remainingToAllocate -= allocation;
+
+                if (tx.amount - tx.repaid <= 0) {
+                    tx.status = 'settled';
                 }
+            }
+
+            // Create Income Entry
+            const recoveryEntry = {
+                id: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                amount: receivedAmount,
+                type: 'income',
+                desc: `Recovery: ${person}`,
+                account: targetAcc,
+                note: `Udhar recovered (Bulk Payment)`
+            };
+            transactions.push(recoveryEntry);
+            
+            saveData();
+            document.getElementById('wusool-modal').classList.add('hidden');
+            renderUdharList();
+
+            // WhatsApp Msg (Total Remaining Calculation)
+            const allLoans = transactions.filter(tx => tx.type === 'udhar' && tx.status === 'active' && tx.person === person);
+            const totalRemaining = allLoans.reduce((sum, tx) => sum + (tx.amount - (tx.repaid || 0)), 0);
+            
+            // Find phone number from the latest transaction of this person
+            const lastTx = transactions.slice().reverse().find(tx => tx.person === person && tx.phone);
+            
+            if (lastTx && lastTx.phone) {
+                const cleanPhone = lastTx.phone.replace(/\D/g, '');
+                const finalPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+                let msg = "";
+                
+                if (totalRemaining > 0) {
+                    msg = `Salam%0A${person},%0AAaj aapki taraf se ₹${receivedAmount} receive hue.%0ABaaki: ₹${totalRemaining}.%0AShukriya.`;
+                } else {
+                    msg = `${person},%0AAaj aapki taraf se ₹${receivedAmount} receive hue.%0AShukriya.`;
+                }
+                
+                window.open(`https://wa.me/${finalPhone}?text=${msg}`, '_blank');
             }
         }
 
