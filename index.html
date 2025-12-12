@@ -141,12 +141,20 @@
                 <i class="fas fa-hand-holding-usd absolute -right-4 -bottom-4 text-8xl text-white opacity-20"></i>
                 <p class="text-xs text-orange-100 uppercase font-bold tracking-wider mb-1">Total Udhar Market Mein</p>
                 <h1 class="text-3xl font-bold" id="udhar-total-display">₹0</h1>
-                <p class="text-[10px] text-orange-100 mt-2 opacity-80">Tap row to see options.</p>
+                <p class="text-[10px] text-orange-100 mt-2 opacity-80">Manage loans & recoveries.</p>
+            </div>
+
+            <!-- NEW ENTRY BUTTON -->
+            <div class="mb-4">
+                <button onclick="openNewUdharModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-slate-200 flex items-center justify-center gap-2 transition-all active:scale-95 border border-slate-700">
+                    <div class="bg-white/20 w-6 h-6 rounded-full flex items-center justify-center"><i class="fas fa-plus text-xs"></i></div>
+                    <span>Naya Udhar (New Contact)</span>
+                </button>
             </div>
 
             <h3 class="font-bold text-slate-700 text-sm mb-3">Logon pe Baqaya (Active List)</h3>
             
-            <!-- NEW LIST STYLE FOR UDHAR -->
+            <!-- UDHAR LIST -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <ul id="udhar-list" class="divide-y divide-slate-50"></ul>
             </div>
@@ -183,16 +191,16 @@
                     </div>
                 </button>
             </div>
-            <p class="text-center text-[10px] text-slate-300 mt-8">Madani Budget v3.5 Pro</p>
+            <p class="text-center text-[10px] text-slate-300 mt-8">Madani Budget v3.8 Pro</p>
         </section>
     </div>
 
-    <!-- === ADD MODAL === -->
+    <!-- === ADD MODAL (MAIN) === -->
     <div id="add-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-end justify-center sm:items-center p-0 sm:p-4 transition-opacity">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 animate-fade-in-up shadow-2xl" style="max-height: 90vh; overflow-y: auto;">
             
             <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-lg text-slate-800">Add Entry</h3>
+                <h3 class="font-bold text-lg text-slate-800" id="add-modal-title">Add Entry</h3>
                 <button onclick="toggleModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
 
@@ -231,11 +239,16 @@
                     </div>
                 </div>
 
-                <!-- Udhar Specific Fields -->
+                <!-- Udhar Specific Fields (Updated) -->
                 <div id="udhar-fields" class="hidden space-y-4 bg-orange-50 p-4 rounded-xl border border-orange-100">
                     <div>
                         <label class="block text-[10px] font-bold text-orange-700 uppercase mb-1">Kis ko diya? (Name)</label>
-                        <input type="text" id="udhar-person" list="udhar-names-list" placeholder="Select or Type Name..." class="w-full p-3 bg-white border border-orange-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-orange-500">
+                        <div class="relative">
+                            <input type="text" id="udhar-person" list="udhar-names-list" placeholder="Select or Type Name..." class="w-full p-3 pr-10 bg-white border border-orange-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-orange-500">
+                            <button onclick="pickContact()" class="absolute right-2 top-2.5 text-teal-600 w-8 h-8 flex items-center justify-center hover:bg-teal-50 rounded-full transition-colors" title="Pick from Phone/App">
+                                <i class="fas fa-address-book text-lg"></i>
+                            </button>
+                        </div>
                         <datalist id="udhar-names-list">
                             <!-- Populated by JS -->
                         </datalist>
@@ -270,8 +283,21 @@
                 </div>
 
                 <button onclick="saveTransaction()" class="w-full bg-teal-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-200 hover:bg-teal-700 transition active:scale-95 flex justify-center items-center gap-2">
-                    <i class="fas fa-check"></i> Save Entry
+                    <i class="fas fa-check"></i> <span id="save-btn-text">Save Entry</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === EXISTING CONTACTS SELECTOR MODAL === -->
+    <div id="contacts-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl animate-fade-in-up">
+            <div class="flex justify-between items-center mb-3 border-b border-slate-100 pb-2">
+                <h3 class="font-bold text-slate-800">Select Contact</h3>
+                <button onclick="document.getElementById('contacts-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="contacts-list-content" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar">
+                <!-- Filled by JS -->
             </div>
         </div>
     </div>
@@ -312,7 +338,7 @@
         </div>
     </div>
 
-    <!-- === PERSON ACTION & HISTORY MODAL (UPDATED) === -->
+    <!-- === PERSON ACTION & HISTORY MODAL === -->
     <div id="person-history-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-fade-in-up" style="max-height: 85vh;">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
@@ -371,6 +397,9 @@
     <script>
         // --- DATA & SETUP ---
         let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        // Global var to track editing
+        let editingTransactionId = null;
+
         const expenseCats = ["Food", "Rent", "Bills", "Transport", "Shopping", "Medical", "Education", "Charity", "Other"];
         const incomeCats = ["Salary", "Business", "Gift", "Bonus", "Loan Taken", "Other"];
         
@@ -422,33 +451,113 @@
             if(view === 'udhar') renderUdharList();
         }
 
-        function toggleModal() {
+        function toggleModal(typeToSet) {
             const m = document.getElementById('add-modal');
             m.classList.toggle('hidden');
             if(!m.classList.contains('hidden')) {
-                setTxType('expense');
+                // If opening, reset everything
+                editingTransactionId = null;
+                document.getElementById('add-modal-title').innerText = "Add Entry";
+                document.getElementById('save-btn-text').innerText = "Save Entry";
+                
+                if (typeToSet) {
+                    setTxType(typeToSet);
+                } else {
+                    setTxType('expense');
+                }
                 document.getElementById('tx-amount').value = '';
                 document.getElementById('tx-note').value = '';
                 document.getElementById('udhar-person').value = '';
                 document.getElementById('udhar-phone').value = '';
                 
-                // Populate Udhar Names Datalist
-                const names = [...new Set(transactions.filter(t => t.type === 'udhar').map(t => t.person))];
-                const datalist = document.getElementById('udhar-names-list');
-                datalist.innerHTML = '';
-                names.forEach(name => {
-                    const opt = document.createElement('option');
-                    opt.value = name;
-                    datalist.appendChild(opt);
-                });
+                // Populate Datalist
+                updateDatalist();
                 
-                // Auto-fill phone if name exists (simple check)
+                // Clear validation
                 const personInput = document.getElementById('udhar-person');
                 personInput.onchange = function() {
                     const existing = transactions.find(t => t.person === this.value && t.phone);
                     if(existing) document.getElementById('udhar-phone').value = existing.phone;
                 };
             }
+        }
+
+        function openNewUdharModal() {
+            const m = document.getElementById('add-modal');
+            m.classList.remove('hidden');
+            
+            editingTransactionId = null;
+            document.getElementById('add-modal-title').innerText = "Add Entry";
+            document.getElementById('save-btn-text').innerText = "Save Entry";
+
+            setTxType('udhar');
+            document.getElementById('tx-amount').value = '';
+            document.getElementById('tx-note').value = '';
+            document.getElementById('udhar-person').value = '';
+            document.getElementById('udhar-phone').value = '';
+            updateDatalist();
+        }
+
+        function updateDatalist() {
+            const names = [...new Set(transactions.filter(t => t.type === 'udhar').map(t => t.person))];
+            const datalist = document.getElementById('udhar-names-list');
+            datalist.innerHTML = '';
+            names.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                datalist.appendChild(opt);
+            });
+        }
+
+        // --- CONTACT PICKER LOGIC ---
+        async function pickContact() {
+            // 1. Try Native API
+            if ('contacts' in navigator && 'ContactsManager' in window) {
+                try {
+                    const props = ['name', 'tel'];
+                    const opts = { multiple: false };
+                    const contacts = await navigator.contacts.select(props, opts);
+                    if (contacts.length) {
+                        const contact = contacts[0];
+                        document.getElementById('udhar-person').value = contact.name[0];
+                        if (contact.tel && contact.tel.length) {
+                            document.getElementById('udhar-phone').value = contact.tel[0].replace(/\D/g, ''); 
+                        }
+                    }
+                    return;
+                } catch (ex) {
+                    // Fallback to app contacts
+                }
+            }
+            
+            // 2. Fallback: Show App Contacts List
+            showAppContactList();
+        }
+
+        function showAppContactList() {
+            const names = [...new Set(transactions.filter(t => t.type === 'udhar').map(t => t.person))];
+            const listDiv = document.getElementById('contacts-list-content');
+            listDiv.innerHTML = '';
+            
+            if(names.length === 0) {
+                listDiv.innerHTML = '<p class="text-center text-xs text-slate-400">No contacts saved yet.</p>';
+            } else {
+                names.forEach(name => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-3 bg-slate-50 hover:bg-slate-100 rounded-lg text-sm font-bold text-slate-700 flex items-center gap-3";
+                    btn.innerHTML = `<div class="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-xs">${name.charAt(0)}</div> ${name}`;
+                    btn.onclick = () => {
+                        document.getElementById('udhar-person').value = name;
+                        // Auto-fill phone
+                        const existing = transactions.find(t => t.person === name && t.phone);
+                        if(existing) document.getElementById('udhar-phone').value = existing.phone;
+                        
+                        document.getElementById('contacts-modal').classList.add('hidden');
+                    };
+                    listDiv.appendChild(btn);
+                });
+            }
+            document.getElementById('contacts-modal').classList.remove('hidden');
         }
 
         // --- TIME AGO UTIL ---
@@ -573,6 +682,40 @@
             
             if(!amount || amount <= 0) return alert("Enter valid amount");
 
+            // IF EDITING
+            if (editingTransactionId) {
+                const idx = transactions.findIndex(t => t.id === editingTransactionId);
+                if (idx !== -1) {
+                    transactions[idx].amount = amount;
+                    transactions[idx].date = date;
+                    transactions[idx].note = note;
+                    transactions[idx].type = type;
+                    
+                    if (type === 'udhar') {
+                        transactions[idx].person = document.getElementById('udhar-person').value;
+                        transactions[idx].phone = document.getElementById('udhar-phone').value;
+                        transactions[idx].account = document.getElementById('udhar-source').value;
+                        transactions[idx].returnDate = document.getElementById('udhar-return-date').value;
+                        transactions[idx].desc = `Loan to ${transactions[idx].person}`;
+                    } else {
+                        transactions[idx].desc = document.getElementById('tx-category').value;
+                        transactions[idx].account = document.getElementById('tx-account').value;
+                    }
+                    
+                    saveData();
+                    toggleModal(); // closes modal & resets ID
+                    
+                    // If we were in history view, refresh it
+                    const phModal = document.getElementById('person-history-modal');
+                    if (!phModal.classList.contains('hidden')) {
+                        const name = document.getElementById('ph-name').innerText;
+                        openPersonDetails(name);
+                    }
+                    return;
+                }
+            }
+
+            // IF NEW
             let entry = {
                 id: Date.now(),
                 date: date,
@@ -614,14 +757,80 @@
             }
         }
 
+        // --- NEW EDIT & DELETE FUNCTIONS ---
+        function deleteTransaction(id) {
+            if(!confirm("Are you sure you want to delete this entry?")) return;
+            
+            transactions = transactions.filter(t => t.id !== id);
+            saveData();
+            updateUI();
+            
+            // Refresh Person History Modal if open
+            const phModal = document.getElementById('person-history-modal');
+            if (!phModal.classList.contains('hidden')) {
+                const name = document.getElementById('ph-name').innerText;
+                openPersonDetails(name);
+                // Also refresh main list
+                renderUdharList();
+            }
+        }
+
+        function editTransaction(id) {
+            const t = transactions.find(tx => tx.id === id);
+            if (!t) return;
+
+            editingTransactionId = id;
+            
+            // Hide History Modal temporarily
+            document.getElementById('person-history-modal').classList.add('hidden');
+            
+            // Open Add Modal
+            const m = document.getElementById('add-modal');
+            m.classList.remove('hidden');
+            
+            document.getElementById('add-modal-title').innerText = "Edit Entry";
+            document.getElementById('save-btn-text').innerText = "Update Entry";
+
+            // Set Type
+            setTxType(t.type);
+            
+            // Fill Fields
+            document.getElementById('tx-amount').value = t.amount;
+            document.getElementById('tx-date').value = t.date;
+            document.getElementById('tx-note').value = t.note || '';
+
+            if (t.type === 'udhar') {
+                document.getElementById('udhar-person').value = t.person;
+                document.getElementById('udhar-phone').value = t.phone || '';
+                document.getElementById('udhar-source').value = t.account;
+                document.getElementById('udhar-return-date').value = t.returnDate || '';
+            } else {
+                // If it's income/expense
+                document.getElementById('tx-category').value = t.desc;
+                document.getElementById('tx-account').value = t.account;
+            }
+        }
+
         function giveMoreUdhar(name) {
             document.getElementById('person-history-modal').classList.add('hidden');
-            toggleModal();
+            
+            const m = document.getElementById('add-modal');
+            m.classList.remove('hidden');
+            
+            // Ensure fresh state
+            editingTransactionId = null;
+            document.getElementById('add-modal-title').innerText = "Add Entry";
+            document.getElementById('save-btn-text').innerText = "Save Entry";
+            
             setTxType('udhar');
             document.getElementById('udhar-person').value = name;
+            
             // Find existing phone number
             const existing = transactions.find(t => t.person === name && t.phone);
             if(existing) document.getElementById('udhar-phone').value = existing.phone;
+            
+            document.getElementById('tx-amount').value = '';
+            document.getElementById('tx-note').value = '';
         }
 
         function updateUI() {
@@ -695,16 +904,16 @@
                 
                 // Contact List Style
                 li.onclick = () => openPersonDetails(p.name);
-                li.className = "bg-white p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer";
+                li.className = "bg-white p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer group";
                 li.innerHTML = `
                     <div class="flex items-center gap-4">
                         <!-- Avatar -->
-                        <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xl shadow-sm border border-slate-200">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xl shadow-sm border border-slate-200 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
                             ${initial}
                         </div>
                         <!-- Name & Time -->
                         <div>
-                            <h4 class="font-bold text-slate-800 text-sm leading-tight mb-0.5">${p.name}</h4>
+                            <h4 class="font-bold text-slate-800 text-sm leading-tight mb-0.5 group-hover:text-teal-700 transition-colors">${p.name}</h4>
                             <p class="text-[11px] text-slate-400 font-medium">${timeAgo(p.lastTxDate)}</p>
                         </div>
                     </div>
@@ -720,6 +929,7 @@
         function openPersonDetails(name) {
             const modal = document.getElementById('person-history-modal');
             document.getElementById('ph-name').innerText = name;
+            modal.classList.remove('hidden'); // Show modal first
             
             // Setup buttons
             document.getElementById('btn-give-more').onclick = () => giveMoreUdhar(name);
@@ -754,12 +964,17 @@
                                     <p class="text-[10px] text-slate-400">${t.date} • ${subtext}</p>
                                 </div>
                             </div>
-                            <span class="font-bold text-sm ${color}">${formatter.format(t.amount)}</span>
+                            <div class="text-right">
+                                <span class="font-bold text-sm ${color} block">${formatter.format(t.amount)}</span>
+                                <div class="flex gap-2 justify-end mt-1">
+                                    <button onclick="editTransaction(${t.id})" class="text-slate-400 hover:text-blue-500 text-[10px]"><i class="fas fa-pencil-alt"></i></button>
+                                    <button onclick="deleteTransaction(${t.id})" class="text-slate-400 hover:text-red-500 text-[10px]"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
             }
-            modal.classList.remove('hidden');
         }
 
         function openWusoolForPerson(name) {
