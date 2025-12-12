@@ -144,7 +144,7 @@
                 <p class="text-[10px] text-orange-100 mt-2 opacity-80">Tap 'Wusool' to collect money back.</p>
             </div>
 
-            <h3 class="font-bold text-slate-700 text-sm mb-3">Active Loans (Logon ne dene hain)</h3>
+            <h3 class="font-bold text-slate-700 text-sm mb-3">Logon pe Baqaya (Active List)</h3>
             <ul id="udhar-list" class="space-y-3"></ul>
             <p id="no-udhar-msg" class="text-center text-slate-400 text-xs py-10 hidden">No active loans.</p>
         </section>
@@ -178,7 +178,7 @@
                     </div>
                 </button>
             </div>
-            <p class="text-center text-[10px] text-slate-300 mt-8">Madani Budget v3.3 Pro</p>
+            <p class="text-center text-[10px] text-slate-300 mt-8">Madani Budget v3.4 Pro</p>
         </section>
     </div>
 
@@ -230,7 +230,10 @@
                 <div id="udhar-fields" class="hidden space-y-4 bg-orange-50 p-4 rounded-xl border border-orange-100">
                     <div>
                         <label class="block text-[10px] font-bold text-orange-700 uppercase mb-1">Kis ko diya? (Name)</label>
-                        <input type="text" id="udhar-person" placeholder="e.g. Rahul, Shopkeeper..." class="w-full p-3 bg-white border border-orange-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-orange-500">
+                        <input type="text" id="udhar-person" list="udhar-names-list" placeholder="Select or Type Name..." class="w-full p-3 bg-white border border-orange-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-orange-500">
+                        <datalist id="udhar-names-list">
+                            <!-- Populated by JS -->
+                        </datalist>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-orange-700 uppercase mb-1">Mobile Number (WhatsApp)</label>
@@ -281,12 +284,11 @@
         </div>
     </div>
 
-    <!-- === WUSOOL MODAL (Recover Money - Updated) === -->
+    <!-- === WUSOOL MODAL (Recover Money) === -->
     <div id="wusool-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl">
             <h3 class="font-bold text-lg mb-1">Money Received?</h3>
             <p class="text-xs text-slate-500 mb-4" id="wusool-msg">Settling udhar for...</p>
-            <input type="hidden" id="wusool-id">
             <input type="hidden" id="wusool-person-name">
             
             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Received Amount (₹)</label>
@@ -301,6 +303,22 @@
             <div class="flex gap-2">
                 <button onclick="document.getElementById('wusool-modal').classList.add('hidden')" class="flex-1 py-2 text-slate-500 font-bold text-xs bg-slate-100 rounded-lg">Cancel</button>
                 <button onclick="confirmWusool()" class="flex-1 py-2 text-white font-bold text-xs bg-green-600 rounded-lg">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === PERSON HISTORY MODAL === -->
+    <div id="person-history-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-fade-in-up" style="max-height: 85vh;">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                <div>
+                    <h3 class="font-bold text-lg text-slate-800" id="ph-name">Person Name</h3>
+                    <p class="text-[10px] text-slate-400">Transaction History</p>
+                </div>
+                <button onclick="document.getElementById('person-history-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="ph-content" class="space-y-3 overflow-y-auto no-scrollbar" style="max-height: 60vh;">
+                <!-- History items -->
             </div>
         </div>
     </div>
@@ -396,6 +414,23 @@
                 document.getElementById('tx-note').value = '';
                 document.getElementById('udhar-person').value = '';
                 document.getElementById('udhar-phone').value = '';
+                
+                // Populate Udhar Names Datalist
+                const names = [...new Set(transactions.filter(t => t.type === 'udhar').map(t => t.person))];
+                const datalist = document.getElementById('udhar-names-list');
+                datalist.innerHTML = '';
+                names.forEach(name => {
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    datalist.appendChild(opt);
+                });
+                
+                // Auto-fill phone if name exists (simple check)
+                const personInput = document.getElementById('udhar-person');
+                personInput.onchange = function() {
+                    const existing = transactions.find(t => t.person === this.value && t.phone);
+                    if(existing) document.getElementById('udhar-phone').value = existing.phone;
+                };
             }
         }
 
@@ -586,33 +621,54 @@
         function renderUdharList() {
             const list = document.getElementById('udhar-list');
             list.innerHTML = '';
-            const loans = transactions.filter(t => t.type === 'udhar' && t.status === 'active');
+            
+            // Group by Person
+            const people = {};
+            
+            transactions.forEach(t => {
+                if(t.type === 'udhar' && t.status === 'active') {
+                    if(!people[t.person]) {
+                        people[t.person] = {
+                            name: t.person,
+                            total: 0,
+                            repaid: 0,
+                            txs: [],
+                            phone: t.phone
+                        };
+                    }
+                    people[t.person].total += t.amount;
+                    people[t.person].repaid += (t.repaid || 0);
+                    people[t.person].txs.push(t);
+                }
+            });
 
-            if(loans.length === 0) document.getElementById('no-udhar-msg').classList.remove('hidden');
+            const activePeople = Object.values(people).filter(p => (p.total - p.repaid) > 0);
+
+            if(activePeople.length === 0) document.getElementById('no-udhar-msg').classList.remove('hidden');
             else document.getElementById('no-udhar-msg').classList.add('hidden');
 
-            loans.forEach(t => {
-                const remaining = t.amount - (t.repaid || 0);
+            activePeople.forEach(p => {
+                const remaining = p.total - p.repaid;
                 const li = document.createElement('li');
                 li.className = "bg-white p-4 rounded-2xl border border-orange-100 shadow-sm relative overflow-hidden";
                 li.innerHTML = `
                     <div class="flex justify-between items-start mb-2 relative z-10">
                         <div>
-                            <h4 class="font-bold text-slate-800">${t.person}</h4>
-                            <p class="text-[10px] text-slate-400">Given from: ${t.account}</p>
+                            <h4 class="font-bold text-slate-800 text-base">${p.name}</h4>
+                            <p class="text-[10px] text-slate-400">Total Udhar: ${formatter.format(p.total)}</p>
                         </div>
                         <div class="text-right">
-                            <h3 class="font-bold text-orange-600">${formatter.format(remaining)}</h3>
-                            <p class="text-[9px] text-slate-400">Total: ${formatter.format(t.amount)}</p>
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">Pending</p>
+                            <h3 class="font-bold text-orange-600 text-lg">${formatter.format(remaining)}</h3>
                         </div>
                     </div>
-                    <div class="flex justify-between items-center relative z-10 mt-2">
-                        <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">
-                            <i class="fas fa-clock mr-1"></i> Due: ${t.returnDate || 'No Date'}
-                        </span>
+                    <div class="flex justify-between items-center relative z-10 mt-3 pt-3 border-t border-slate-50">
+                        <button onclick="showPersonHistory('${p.name}')" class="text-xs font-bold text-slate-500 hover:text-teal-600 flex items-center gap-1">
+                            <i class="fas fa-history"></i> History
+                        </button>
                         <div class="flex gap-2">
-                            ${t.phone ? `<a href="https://wa.me/${t.phone.length===10?'91'+t.phone:t.phone}?text=Reminder: ${t.person}, udhar wapas kab kar rahe ho?" target="_blank" class="bg-green-100 text-green-600 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-green-200"><i class="fab fa-whatsapp"></i></a>` : ''}
-                            <button onclick="openWusool(${t.id})" class="bg-green-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-md shadow-green-100 active:scale-95 transition-transform">
+                            ${p.phone ? `<a href="https://wa.me/${p.phone.length===10?'91'+p.phone:p.phone}?text=Reminder: ${p.name}, total pending balance is ${formatter.format(remaining)}." target="_blank" class="bg-green-100 text-green-600 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-green-200"><i class="fab fa-whatsapp"></i></a>` : ''}
+                            <button onclick="openWusoolForPerson('${p.name}')" class="bg-green-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-md shadow-green-100 active:scale-95 transition-transform">
                                 Wusool (Recover)
                             </button>
                         </div>
@@ -623,19 +679,59 @@
             });
         }
 
-        function openWusool(id) {
-            const t = transactions.find(x => x.id === id);
-            if (!t) return;
+        function showPersonHistory(name) {
+            const modal = document.getElementById('person-history-modal');
+            document.getElementById('ph-name').innerText = name;
+            const content = document.getElementById('ph-content');
+            content.innerHTML = '';
+
+            // Find all transactions related to this person (Udhar given & Repayments/Recoveries)
+            // Note: Recoveries are stored as 'income' with 'Recovery: Name' desc.
+            // Active Udhars are 'udhar'.
             
-            const person = t.person;
-            // Calculate total pending for this person across ALL active entries
-            const personLoans = transactions.filter(tx => tx.type === 'udhar' && tx.status === 'active' && tx.person === person);
+            const related = transactions.filter(t => 
+                (t.type === 'udhar' && t.person === name) || 
+                (t.type === 'income' && t.desc === `Recovery: ${name}`)
+            ).sort((a,b) => b.id - a.id); // Newest first
+
+            if(related.length === 0) {
+                content.innerHTML = '<p class="text-center text-xs text-slate-400">No records found.</p>';
+            } else {
+                related.forEach(t => {
+                    let isRecovery = t.type === 'income';
+                    let color = isRecovery ? 'text-green-600' : 'text-orange-600';
+                    let icon = isRecovery ? 'fa-arrow-down' : 'fa-arrow-up';
+                    let label = isRecovery ? 'Received' : 'Given';
+                    let subtext = isRecovery ? t.account : `Due: ${t.returnDate || 'N/A'}`;
+
+                    content.innerHTML += `
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full ${isRecovery ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-500'} flex items-center justify-center text-xs">
+                                    <i class="fas ${icon}"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-xs text-slate-700">${label}</p>
+                                    <p class="text-[10px] text-slate-400">${t.date} • ${subtext}</p>
+                                </div>
+                            </div>
+                            <span class="font-bold text-sm ${color}">${formatter.format(t.amount)}</span>
+                        </div>
+                    `;
+                });
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function openWusoolForPerson(name) {
+            // Calculate total pending
+            const personLoans = transactions.filter(tx => tx.type === 'udhar' && tx.status === 'active' && tx.person === name);
             const totalPending = personLoans.reduce((sum, tx) => sum + (tx.amount - (tx.repaid || 0)), 0);
 
-            document.getElementById('wusool-id').value = id; // Strictly ref
-            document.getElementById('wusool-person-name').value = person;
-            
-            document.getElementById('wusool-msg').innerText = `Total Pending for ${person}: ${formatter.format(totalPending)}`;
+            if(totalPending <= 0) return alert("No pending balance.");
+
+            document.getElementById('wusool-person-name').value = name;
+            document.getElementById('wusool-msg').innerText = `Total Pending for ${name}: ${formatter.format(totalPending)}`;
             document.getElementById('wusool-amount').value = '';
             
             document.getElementById('wusool-modal').classList.remove('hidden');
@@ -663,7 +759,7 @@
                 tx.repaid = (tx.repaid || 0) + allocation;
                 remainingToAllocate -= allocation;
 
-                if (tx.amount - tx.repaid <= 0) {
+                if (tx.amount - tx.repaid <= 0.1) { // float tolerance
                     tx.status = 'settled';
                 }
             }
@@ -685,10 +781,10 @@
             renderUdharList();
 
             // WhatsApp Msg (Total Remaining Calculation)
-            const allLoans = transactions.filter(tx => tx.type === 'udhar' && tx.status === 'active' && tx.person === person);
-            const totalRemaining = allLoans.reduce((sum, tx) => sum + (tx.amount - (tx.repaid || 0)), 0);
+            const allActive = transactions.filter(tx => tx.type === 'udhar' && tx.status === 'active' && tx.person === person);
+            const totalRemaining = allActive.reduce((sum, tx) => sum + (tx.amount - (tx.repaid || 0)), 0);
             
-            // Find phone number from the latest transaction of this person
+            // Find phone number from any transaction of this person
             const lastTx = transactions.slice().reverse().find(tx => tx.person === person && tx.phone);
             
             if (lastTx && lastTx.phone) {
