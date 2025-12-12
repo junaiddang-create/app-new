@@ -93,10 +93,24 @@
                 </div>
             </div>
 
-            <!-- Analysis Section -->
+            <!-- Analysis Section (Enhanced) -->
             <h3 class="font-bold text-slate-700 text-sm mb-3">Expense Analysis</h3>
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-4">
-                <div class="h-64 relative"><canvas id="expenseChart"></canvas></div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-4">
+                <div class="flex justify-center mb-6 relative">
+                    <div class="h-48 w-48 relative z-10">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                    <!-- Total Overlay -->
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <p class="text-[10px] text-slate-400 uppercase font-bold">Total</p>
+                        <p class="text-lg font-bold text-slate-800" id="chart-total-center">₹0</p>
+                    </div>
+                </div>
+                
+                <!-- Category Legend with Icons & Percent -->
+                <div id="analysis-legend" class="space-y-3">
+                    <!-- JS will populate this -->
+                </div>
             </div>
         </section>
 
@@ -164,7 +178,7 @@
                     </div>
                 </button>
             </div>
-            <p class="text-center text-[10px] text-slate-300 mt-8">Madani Budget v3.1 Pro</p>
+            <p class="text-center text-[10px] text-slate-300 mt-8">Madani Budget v3.2 Pro</p>
         </section>
     </div>
 
@@ -320,6 +334,20 @@
         let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
         const expenseCats = ["Food", "Rent", "Bills", "Transport", "Shopping", "Medical", "Education", "Charity", "Other"];
         const incomeCats = ["Salary", "Business", "Gift", "Bonus", "Loan Taken", "Other"];
+        
+        // Icon Map
+        const categoryIcons = {
+            "Food": "fa-utensils text-orange-500",
+            "Rent": "fa-home text-blue-500",
+            "Bills": "fa-file-invoice-dollar text-red-500",
+            "Transport": "fa-bus text-yellow-500",
+            "Shopping": "fa-shopping-bag text-purple-500",
+            "Medical": "fa-briefcase-medical text-green-500",
+            "Education": "fa-graduation-cap text-indigo-500",
+            "Charity": "fa-hand-holding-heart text-pink-500",
+            "Other": "fa-shapes text-gray-500"
+        };
+
         const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 });
 
         window.onload = function() {
@@ -373,17 +401,12 @@
             const title = document.getElementById('summary-title');
             const content = document.getElementById('summary-content');
             
-            // Filter transactions
             const filtered = transactions.filter(t => t.type === type);
             const total = filtered.reduce((sum, t) => sum + t.amount, 0);
             
-            // Group by category
             const categories = {};
-            filtered.forEach(t => {
-                categories[t.desc] = (categories[t.desc] || 0) + t.amount;
-            });
+            filtered.forEach(t => { categories[t.desc] = (categories[t.desc] || 0) + t.amount; });
 
-            // UI Setup
             title.innerText = type === 'income' ? 'Income Breakdown' : 'Expense Breakdown';
             title.className = `font-bold text-lg ${type === 'income' ? 'text-emerald-700' : 'text-rose-700'}`;
             
@@ -397,24 +420,27 @@
                     </div>
                 `;
                 
-                // Sort categories by amount desc
                 const sortedCats = Object.entries(categories).sort((a,b) => b[1] - a[1]);
                 
                 html += '<ul class="space-y-3">';
                 sortedCats.forEach(([cat, amount]) => {
                     const percent = ((amount / total) * 100).toFixed(1);
                     const barColor = type === 'income' ? 'bg-emerald-500' : 'bg-rose-500';
-                    
+                    const iconClass = categoryIcons[cat] || "fa-circle text-slate-400";
+
                     html += `
                         <li>
-                            <div class="flex justify-between items-end mb-1 text-sm">
-                                <span class="font-bold text-slate-700">${cat}</span>
+                            <div class="flex justify-between items-center mb-1 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs"><i class="fas ${iconClass}"></i></div>
+                                    <span class="font-bold text-slate-700">${cat}</span>
+                                </div>
                                 <div class="text-right leading-none">
                                     <span class="font-bold block text-slate-800">${formatter.format(amount)}</span>
                                     <span class="text-[9px] text-slate-400 font-bold">${percent}%</span>
                                 </div>
                             </div>
-                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden ml-8 w-[calc(100%-2rem)]">
                                 <div class="h-full ${barColor} rounded-full" style="width: ${percent}%"></div>
                             </div>
                         </li>
@@ -496,14 +522,13 @@
                 
                 if(!person) return alert("Person name required");
                 
-                // Udhar Logic: Expense from Source (Cash/Bank), Add to Udhar Balance
                 entry.desc = `Loan to ${person}`;
                 entry.account = source; 
                 entry.person = person;
                 entry.phone = phone;
                 entry.returnDate = returnDate;
                 entry.isUdhar = true;
-                entry.status = 'active'; // active vs settled
+                entry.status = 'active'; 
             } else {
                 entry.desc = document.getElementById('tx-category').value;
                 entry.account = document.getElementById('tx-account').value;
@@ -514,20 +539,15 @@
             saveData();
             toggleModal();
 
-            // WhatsApp Integration (Updated Message Format)
             if(type === 'udhar' && entry.phone) {
                 const cleanPhone = entry.phone.replace(/\D/g, '');
                 const finalPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-                
-                // New Multi-line Message Format
                 const msg = `Salam%0A${entry.person},%0AAapne ₹${entry.amount} udhaar liye hain / kaam ki rakam hai.%0AWapas karne ki tareekh: ${entry.returnDate || 'Tay nahi hui'}.%0AEntry save kar di gayi hai.`;
-                
                 window.open(`https://wa.me/${finalPhone}?text=${msg}`, '_blank');
             }
         }
 
         function updateUI() {
-            // Calculate Balances
             let cash = 0, bank = 0, udhar = 0, income = 0, expense = 0;
 
             transactions.forEach(t => {
@@ -543,8 +563,6 @@
                     udhar += t.amount;
                     if(t.account === 'Cash') cash -= t.amount; else bank -= t.amount;
                 }
-                // Handle Udhar Returns (Settlements) are separate transactions usually or modify state
-                // For this simple version, we assume 'Wusool' creates an Income entry or reverses the udhar
             });
 
             document.getElementById('total-balance').innerText = formatter.format(cash + bank + udhar);
@@ -606,26 +624,45 @@
             const id = parseInt(document.getElementById('wusool-id').value);
             const targetAcc = document.getElementById('wusool-account').value;
             
-            // 1. Mark Udhar as settled
             const idx = transactions.findIndex(t => t.id === id);
             if(idx > -1) {
+                const originalTx = transactions[idx];
                 transactions[idx].status = 'settled';
                 
-                // 2. Add Money back to account (Create Income Entry effectively)
                 const recoveryEntry = {
                     id: Date.now(),
                     date: new Date().toISOString().split('T')[0],
-                    amount: transactions[idx].amount,
-                    type: 'income', // Treating recovery as money coming in
-                    desc: `Recovery: ${transactions[idx].person}`,
+                    amount: originalTx.amount,
+                    type: 'income',
+                    desc: `Recovery: ${originalTx.person}`,
                     account: targetAcc,
                     note: 'Udhar recovered'
                 };
                 transactions.push(recoveryEntry);
-                
                 saveData();
                 document.getElementById('wusool-modal').classList.add('hidden');
                 renderUdharList();
+
+                // Calculate Remaining Balance for this Person
+                const personName = originalTx.person;
+                const remaining = transactions
+                    .filter(t => t.type === 'udhar' && t.status === 'active' && t.person === personName)
+                    .reduce((sum, t) => sum + t.amount, 0);
+
+                // Send WhatsApp Message if phone exists
+                if (originalTx.phone) {
+                    const cleanPhone = originalTx.phone.replace(/\D/g, '');
+                    const finalPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+                    let msg = "";
+                    
+                    if (remaining > 0) {
+                        msg = `Salam%0A${personName},%0AAaj aapki taraf se ₹${originalTx.amount} receive hue.%0ABaaki: ₹${remaining}.%0AShukriya.`;
+                    } else {
+                        msg = `${personName},%0AAaj aapki taraf se ₹${originalTx.amount} receive hue.%0AShukriya.`;
+                    }
+                    
+                    window.open(`https://wa.me/${finalPhone}?text=${msg}`, '_blank');
+                }
             }
         }
 
@@ -655,11 +692,22 @@
         let chartInstance = null;
         function updateChart() {
             const ctx = document.getElementById('expenseChart').getContext('2d');
+            const legendContainer = document.getElementById('analysis-legend');
             const expenses = {};
-            transactions.filter(t => t.type === 'expense').forEach(t => {
+            
+            // Filter only expenses
+            const expenseTx = transactions.filter(t => t.type === 'expense');
+            const totalExpense = expenseTx.reduce((sum, t) => sum + t.amount, 0);
+
+            // Group by category
+            expenseTx.forEach(t => {
                 expenses[t.desc] = (expenses[t.desc] || 0) + t.amount;
             });
 
+            // Update Center Total
+            document.getElementById('chart-total-center').innerText = formatter.format(totalExpense);
+
+            // 1. Draw Chart
             if(chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
@@ -667,11 +715,66 @@
                     labels: Object.keys(expenses),
                     datasets: [{
                         data: Object.values(expenses),
-                        backgroundColor: ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
-                        borderWidth: 0
+                        backgroundColor: ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#64748b'],
+                        borderWidth: 0,
+                        hoverOffset: 4
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 10} } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '75%', // Thinner ring
+                    plugins: { 
+                        legend: { display: false }, // Hide default legend
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed;
+                                    const pct = ((val/totalExpense)*100).toFixed(1);
+                                    return ` ${context.label}: ${formatter.format(val)} (${pct}%)`;
+                                }
+                            }
+                        }
+                    } 
+                }
+            });
+
+            // 2. Generate Custom Legend
+            legendContainer.innerHTML = '';
+            if (Object.keys(expenses).length === 0) {
+                legendContainer.innerHTML = '<p class="text-center text-xs text-slate-400">No expenses recorded yet.</p>';
+                return;
+            }
+
+            // Sort by amount
+            const sortedCats = Object.entries(expenses).sort((a,b) => b[1] - a[1]);
+
+            sortedCats.forEach(([cat, amount], index) => {
+                const percent = ((amount / totalExpense) * 100).toFixed(1);
+                const iconClass = categoryIcons[cat] || "fa-circle";
+                const colors = ['bg-rose-500', 'bg-blue-500', 'bg-green-500', 'bg-amber-500', 'bg-violet-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500', 'bg-slate-500'];
+                const color = colors[index % colors.length]; // Cycle colors to match chart roughly
+
+                const html = `
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 shadow-sm border border-slate-100">
+                                <i class="fas ${iconClass} text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-700 text-xs">${cat}</p>
+                                <div class="w-24 h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                                    <div class="h-full ${color}" style="width: ${percent}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-slate-800 text-xs">${formatter.format(amount)}</p>
+                            <p class="text-[10px] text-slate-400 font-bold">${percent}%</p>
+                        </div>
+                    </div>
+                `;
+                legendContainer.insertAdjacentHTML('beforeend', html);
             });
         }
 
